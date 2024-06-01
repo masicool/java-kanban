@@ -36,9 +36,6 @@ public class Main {
         System.out.println(taskManager.getTaskById(4));
         System.out.println();
 
-        // сменим Эпик у подзадачи
-
-
         System.out.println("Список эпиков:");
         printTasks(taskManager.getEpicTasks());
         System.out.println("Список всех подзадач:");
@@ -59,6 +56,7 @@ public class Main {
         taskManager.updateTaskById(3, new Subtask(subtask.getEpic(), "Грузчики",
                 "Заплатить грузчикам", Status.IN_PROGRESS));
         System.out.println(taskManager.getTaskById(2));
+
         System.out.println("Удалили Эпик с ID = 5 (удалились все подзадачи):");
         taskManager.deleteTask(5);
         printTasks(taskManager.getAllTasks());
