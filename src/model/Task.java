@@ -1,3 +1,5 @@
+package model;
+
 import java.util.Objects;
 
 public class Task {
@@ -6,16 +8,44 @@ public class Task {
     private String description; // описание задачи
     private Status status; // статус задачи
 
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     /**
      * Конструктор объекта
+     *
+     * @param name        наименование задачи
+     * @param description описание задачи
+     */
+    public Task(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+    }
+
+    /**
+     * Конструктор объекта с установкой статуса
      *
      * @param name        наименование задачи
      * @param description описание задачи
      * @param status      статус задачи
      */
     public Task(String name, String description, Status status) {
-        this.name = name;
-        this.description = description;
+        this(name, description);
         this.status = status;
     }
 
@@ -49,7 +79,8 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(name, task.name) && Objects.equals(description, task.description);
+        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description,
+                task.description);
     }
 
     /**
@@ -87,22 +118,11 @@ public class Task {
      */
     @Override
     public String toString() {
-        String taskType = "Task";
-        String lastSymbol = "}";
-        if (this instanceof Epic) {
-            taskType = "Epic";
-            lastSymbol = "";
-        } else if (this instanceof Subtask) {
-            taskType = "Subtask";
-            lastSymbol = "";
-        }
-        return taskType + "{" +
+        return "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + status +
-                lastSymbol
-                ;
+                ", status=" + status + "}";
     }
 
 }
