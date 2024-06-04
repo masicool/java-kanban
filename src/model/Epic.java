@@ -57,15 +57,6 @@ public class Epic extends Task {
     }
 
     /**
-     * Удаление подзадачи Эпика с пересчетом статуса Эпика
-     *
-     * @param subtaskId ID подзадачи
-     */
-    public void deleteSubtask(int subtaskId) {
-        subTasksId.remove(subtaskId);
-    }
-
-    /**
      * Переопределенный метод
      *
      * @return строка в форматированном виде
