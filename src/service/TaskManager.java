@@ -17,15 +17,6 @@ public class TaskManager {
     private final HashMap<Integer, Subtask> subtasks; // список подзадач
 
     /**
-     * Генерация нового идентификатора задачи
-     *
-     * @return ID задачи
-     */
-    public int getNextId() {
-        return ++taskId;
-    }
-
-    /**
      * Конструктор объекта
      */
     public TaskManager() {
@@ -152,7 +143,7 @@ public class TaskManager {
      * @return список задач
      */
     public Collection<Task> getTasks() {
-        return tasks.values();
+        return new ArrayList<>(tasks.values());
     }
 
     /**
@@ -171,7 +162,7 @@ public class TaskManager {
      * @return список задач
      */
     public Collection<Epic> getEpics() {
-        return epics.values();
+        return new ArrayList<>(epics.values());
     }
 
     /**
@@ -189,7 +180,7 @@ public class TaskManager {
      * @return список задач
      */
     public Collection<Subtask> getSubtasks() {
-        return subtasks.values();
+        return new ArrayList<>(subtasks.values());
     }
 
     /**
@@ -215,7 +206,7 @@ public class TaskManager {
         for (int subtaskId : epic.getSubtasksId()) {
             epicSubtasks.add(subtasks.get(subtaskId));
         }
-        return epicSubtasks;
+        return new ArrayList<>(epicSubtasks);
     }
 
     /**
@@ -288,7 +279,7 @@ public class TaskManager {
      *
      * @param epic эпика
      */
-    public void updateEpicStatus(Epic epic) {
+    private void updateEpicStatus(Epic epic) {
         if (!epics.containsKey(epic.getId())) {
             return;
         }
@@ -316,6 +307,15 @@ public class TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
+    }
+
+    /**
+     * Генерация нового идентификатора задачи
+     *
+     * @return ID задачи
+     */
+    private int getNextId() {
+        return ++taskId;
     }
 
 }

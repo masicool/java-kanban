@@ -8,23 +8,6 @@ public class Task {
     private String description; // описание задачи
     private Status status; // статус задачи
 
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     /**
      * Конструктор объекта
      *
@@ -47,6 +30,22 @@ public class Task {
     public Task(String name, String description, Status status) {
         this(name, description);
         this.status = status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
@@ -124,5 +123,4 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", status=" + status + "}";
     }
-
 }
