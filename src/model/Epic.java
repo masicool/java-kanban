@@ -30,6 +30,18 @@ public class Epic extends Task {
     }
 
     /**
+     * Конструктор для глубокого копирования объекта
+     *
+     * @param epic объект
+     */
+    public Epic(Epic epic) {
+        super(epic.getName(), epic.getDescription(), epic.getStatus());
+        super.setId(epic.getId());
+        subTasksId = new HashSet<>();
+        subTasksId.addAll(epic.getSubtasksId());
+    }
+
+    /**
      * Получение списка всех ID подзадач Эпика
      *
      * @return список подзадач Эпика
@@ -41,19 +53,32 @@ public class Epic extends Task {
     /**
      * Добавление подзадачи эпика
      *
-     * @param subtaskId подзадача
+     * @param subtaskId ID подзадачи
+     * @return true - если подзадача добавлена, false - если ошибка добавления
      */
-    public void addSubtaskId(int subtaskId) {
+    public boolean addSubtaskId(int subtaskId) {
+        if (subtaskId <= 0 || getId() == subtaskId) {
+            return false;
+        }
+        if (subTasksId.contains(subtaskId)) {
+            return false;
+        }
         subTasksId.add(subtaskId);
+        return true;
     }
 
     /**
      * Удаление подзадачи эпика по ID
      *
      * @param subtaskId ID подзадачи
+     * @return true - если подзадача удалена, false - если ошибка удаления
      */
-    public void deleteSubtaskId(int subtaskId) {
+    public boolean deleteSubtaskId(int subtaskId) {
+        if (!subTasksId.contains(subtaskId)) {
+            return false;
+        }
         subTasksId.remove(subtaskId);
+        return true;
     }
 
     /**

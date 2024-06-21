@@ -2,6 +2,8 @@ import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
+import service.InMemoryTaskManager;
+import service.Managers;
 import service.TaskManager;
 
 import java.util.Collection;
@@ -9,7 +11,8 @@ import java.util.Collection;
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        Managers managers = new Managers();
+        TaskManager taskManager = managers.getDefault();
 
         Task task;
         Epic epic;

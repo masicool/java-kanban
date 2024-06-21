@@ -32,6 +32,17 @@ public class Task {
         this.status = status;
     }
 
+    /**
+     * Конструктор для глубокого копирования объекта
+     *
+     * @param task объект
+     */
+    public Task(Task task) {
+        this(task.getName(), task.getDescription());
+        this.status = task.getStatus();
+        this.id = task.getId();
+    }
+
     public String getName() {
         return name;
     }
@@ -78,8 +89,8 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description,
-                task.description);
+        // считается что объекты равны друг другу если у них одинаковые ID
+        return id == task.id;
     }
 
     /**
@@ -93,7 +104,7 @@ public class Task {
     }
 
     /**
-     * Получение ID задачи
+     * Установка ID задачи
      *
      * @param id ID задачи
      */
@@ -102,7 +113,7 @@ public class Task {
     }
 
     /**
-     * Установка ID задачи
+     * Получение ID задачи
      *
      * @return ID задачи
      */

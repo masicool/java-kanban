@@ -1,7 +1,7 @@
 package model;
 
 public class Subtask extends Task {
-    private final int epicId;
+    private int epicId;
 
     /**
      * Конструктор объекта
@@ -53,12 +53,36 @@ public class Subtask extends Task {
     }
 
     /**
+     * Конструктор для глубокого копирования объекта
+     *
+     * @param subtask объект
+     */
+    public Subtask(Subtask subtask) {
+        super(subtask.getName(), subtask.getDescription(), subtask.getStatus());
+        this.epicId = subtask.epicId;
+        super.setId(subtask.getId());
+    }
+
+    /**
      * Получение ID эпика
      *
      * @return Эпик
      */
     public int getEpicId() {
         return epicId;
+    }
+
+    /**
+     * Задание ID эпика
+     *
+     * @return true - успешно, false - ошибка указания id эпика
+     */
+    public boolean setEpicId(int epicId) {
+        if (epicId <= 0 || epicId == getId()) {
+            return false;
+        }
+        this.epicId = epicId;
+        return true;
     }
 
     /**
