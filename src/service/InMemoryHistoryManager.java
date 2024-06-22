@@ -18,7 +18,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (task == null) {
             return;
         }
-        if (historyViews.size() >= 10) {
+        if (historyViews.size() >= MAX_HISTORY_SIZE) {
             historyViews.removeFirst();
         }
         historyViews.add(task);
@@ -26,9 +26,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        if (historyViews.isEmpty()) {
-            return null;
-        }
         return List.copyOf(historyViews);
     }
 }

@@ -4,11 +4,10 @@ import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
 
@@ -17,8 +16,8 @@ class InMemoryTaskManagerTest {
     static Epic epic;
     static Subtask subtask;
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void beforeEach() {
         taskManager = new InMemoryTaskManager();
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
         taskManager.addTask(task);
@@ -40,6 +39,29 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    void updateTask() {
+        task.setName("Новое наименование задачи");
+        task.setDescription("Новое описание задачи");
+        task.setStatus(Status.IN_PROGRESS);
+        taskManager.updateTask(task);
+        assertEquals(task, taskManager.getTaskById(task.getId()), "Задача не обновилась");
+    }
+
+    @Test
+    void getTaskEpicSubtaskById() {
+        assertNotNull(taskManager.getTaskById(task.getId()), "Не найдена задача по ID");
+        assertNotNull(taskManager.getEpicById(epic.getId()), "Не найден эпик по ID");
+        assertNotNull(taskManager.getSubtaskById(subtask.getId()), "Не найдена подзадача по ID");
+    }
+
+    @Test
+    void deleteTaskAndFindTaskById() {
+        int tmpId = task.getId();
+        taskManager.deleteTaskById(tmpId);
+        assertNull(taskManager.getTaskById(tmpId), "Задача не удалена из списка задач");
+    }
+
+    @Test
     void checkGeneratedIdAndManualId() {
         Task newTask = new Task("Пойти в ресторан", "Забронировать столик");
         newTask.setId(4); // установили ID в ручную
@@ -48,13 +70,6 @@ class InMemoryTaskManagerTest {
         newTask = new Task("Пойти в ресторан еще раз", "Забронировать столик");
         taskManager.addTask(newTask); // ID генерируется
         assertNotNull(taskManager.getTaskById(5), "Не сохранилась задача в списке");
-    }
-
-    @Test
-    void findTaskEpicSubtaskById() {
-        assertNotNull(taskManager.getTaskById(task.getId()), "Не найдена задача по ID");
-        assertNotNull(taskManager.getEpicById(epic.getId()), "Не найден эпик по ID");
-        assertNotNull(taskManager.getSubtaskById(subtask.getId()), "Не найдена подзадача по ID");
     }
 
     @Test
@@ -81,5 +96,11 @@ class InMemoryTaskManagerTest {
         tmpEpic = taskManager.getEpicById(subtask.getEpicId());
         assertEquals(Status.NEW, tmpEpic.getStatus(), "Не изменился статус Эпика " +
                 "при смене статуса подзадачи");
+    }
+
+    @Test
+    void getHistory() {
+        getTaskEpicSubtaskById();
+        assertNotNull(taskManager.getHistory(), "История задач не сохраняется");
     }
 }

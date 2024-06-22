@@ -5,10 +5,7 @@ import model.Status;
 import model.Subtask;
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     private int taskId; // уникальный идентификатор задачи
@@ -166,8 +163,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Task getTaskById(int taskId) {
-        historyManager.add(tasks.get(taskId));
-        return tasks.get(taskId);
+        Task task = tasks.get(taskId);
+        historyManager.add(task);
+        return task;
     }
 
     /**
@@ -187,8 +185,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Epic getEpicById(int epicId) {
-        historyManager.add(epics.get(epicId));
-        return epics.get(epicId);
+        Epic epic = epics.get(epicId);
+        historyManager.add(epic);
+        return epic;
     }
 
     /**
@@ -208,8 +207,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Subtask getSubtaskById(int subtaskId) {
-        historyManager.add(subtasks.get(subtaskId));
-        return subtasks.get(subtaskId);
+        Subtask subtask = subtasks.get(subtaskId);
+        historyManager.add(subtask);
+        return subtask;
     }
 
     /**
@@ -299,6 +299,11 @@ public class InMemoryTaskManager implements TaskManager {
             // при обновлении эпика, обновляется список подзадач эпика (несуществующие удаляются)
             updateEpicStatus(epic);
         }
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     /**

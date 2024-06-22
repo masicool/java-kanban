@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface TaskManager {
     void addTask(Task task);
@@ -44,4 +45,6 @@ public interface TaskManager {
     void deleteSubtaskById(int id);
 
     void deleteSubtasks();
+
+    List<Task> getHistory();
 }

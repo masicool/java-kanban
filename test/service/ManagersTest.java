@@ -8,8 +8,7 @@ class ManagersTest {
 
     @Test
     void shouldBeNotNull() {
-        Managers managers = new Managers();
-        TaskManager taskManager = managers.getDefault();
-        assertNotNull(taskManager, "Объект TaskManager не создан.");
+        assertNotNull(Managers.getDefault(), "Объект TaskManager не создан.");
+        assertNotNull(Managers.getDefaultHistory(), "Объект InMemoryHistoryManager не создан.");
     }
 }
