@@ -7,7 +7,7 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private final List<Task> historyViews; // история просмотров
-    private final int MAX_HISTORY_SIZE = 10; // размер списка просмотров
+    private static final int MAX_HISTORY_SIZE = 10; // размер списка просмотров
 
     public InMemoryHistoryManager() {
         historyViews = new ArrayList<>();
