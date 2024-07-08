@@ -3,14 +3,32 @@ package service;
 import model.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final List<Task> historyViews; // история просмотров
-    private static final int MAX_HISTORY_SIZE = 10; // размер списка просмотров
+
+    static class Node {
+        public Task task;
+        public Node next;
+        public Node prev;
+
+        public Node(Task task) {
+            this.task = task;
+            this.next = null;
+            this.prev = null;
+        }
+    }
+
+    private Node headHistoryNode; // указатель на начало списка истории просмотров
+    private Node tailHistoryNode; // указатель на конец списка истории просмотров
+    private final Map<Integer, Node> historyEntries;
 
     public InMemoryHistoryManager() {
-        historyViews = new ArrayList<>();
+        historyEntries = new HashMap<>();
+        headHistoryNode = null;
+        tailHistoryNode = null;
     }
 
     @Override
@@ -18,14 +36,64 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (task == null) {
             return;
         }
-        if (historyViews.size() >= MAX_HISTORY_SIZE) {
-            historyViews.removeFirst();
+
+        int idNewTask = task.getId(); // вспомогательная переменная, так как много обращений
+        Node foundNode = historyEntries.get(idNewTask); // ищем узел в связке
+        if (foundNode != null) { // если задача с id в истории уже есть, то ее удаляем их списка
+            removeNode(foundNode);
         }
-        historyViews.add(task);
+
+        Node newTaskNode = new Node(task); // создаем новый узел
+
+        if (tailHistoryNode == null) { // если список пустой, то новый узел - это и начало и конец списка
+            tailHistoryNode = newTaskNode;
+            headHistoryNode = newTaskNode;
+        } else { // иначе добавляем узел и обновляем указатель на конец списка
+            newTaskNode.prev = tailHistoryNode;
+            tailHistoryNode.next = newTaskNode;
+            tailHistoryNode = newTaskNode;
+        }
+        historyEntries.put(idNewTask, newTaskNode); // добавим или обновим связку ID с узлом
     }
 
     @Override
     public List<Task> getHistory() {
-        return List.copyOf(historyViews);
+        Node node = headHistoryNode;
+        List<Task> historyViews = new ArrayList<>();
+        while (node != null) {
+            historyViews.add(node.task);
+            node = node.next;
+        }
+        return historyViews;
+    }
+
+    @Override
+    public void remove(int taskId) {
+        Node foundNode = historyEntries.get(taskId); // ищем узел в связке
+        if (foundNode == null) {
+            return;
+        }
+        removeNode(foundNode);
+        historyEntries.remove(taskId);
+    }
+
+    // метод для удаления узла из списка просмотров
+    private void removeNode(Node node) {
+        Node prev = node.prev;
+        Node next = node.next;
+        if (prev != null) {
+            prev.next = next;
+        }
+        if (next != null) {
+            next.prev = prev;
+        }
+        node.next = null;
+        node.prev = null;
+        if (node == headHistoryNode) {
+            headHistoryNode = next;
+        }
+        if (node == tailHistoryNode) {
+            tailHistoryNode = prev;
+        }
     }
 }

@@ -22,31 +22,34 @@ class InMemoryHistoryManagerTest {
     @BeforeEach
     void beforeEach() {
         historyManager = new InMemoryHistoryManager();
+    }
+
+    @Test
+    void getHistory() {
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
+        task.setId(1);
         historyManager.add(task);
         epic = new Epic("Переезд", "Переезд на новую квартиру");
+        epic.setId(2);
         historyManager.add(epic);
         subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
+        subtask.setId(3);
         historyManager.add(subtask);
         savedHistoryViews = new ArrayList<>();
         savedHistoryViews.add(task);
         savedHistoryViews.add(epic);
         savedHistoryViews.add(subtask);
-    }
-
-    @Test
-    void getHistory() {
         assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(), "История просмотров" +
                 " не сохраняется");
     }
 
     @Test
-    void shouldBeMax10Tasks() {
-        for (int i = 0; i < 12; i++) {
+    void shouldBeMaxMore10Tasks() {
+        for (int i = 1; i <= 42; i++) {
             task = new Task("Задача " + i, "Описание " + i);
+            task.setId(i);
             historyManager.add(task);
         }
-        assertEquals(10, historyManager.getHistory().size(), "В истории не может находится более " +
-                "10 задач");
+        assertEquals(42, historyManager.getHistory().size(), "История просмотров не ограниченна по размеру");
     }
 }
