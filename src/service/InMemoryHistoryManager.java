@@ -33,6 +33,35 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
+        linkLast(task);
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return getTasks();
+    }
+
+    @Override
+    public void remove(int taskId) {
+        Node foundNode = historyEntries.get(taskId); // ищем узел в связке
+        if (foundNode == null) {
+            return;
+        }
+        removeNode(foundNode);
+        historyEntries.remove(taskId);
+    }
+
+    // очистка истории просмотров
+    @Override
+    public void clear() {
+        for (Node node : historyEntries.values()) {
+            removeNode(node);
+        }
+        historyEntries.clear();
+    }
+
+    // добавление задачи в конец списка
+    private void linkLast(Task task) {
         if (task == null) {
             return;
         }
@@ -56,8 +85,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         historyEntries.put(idNewTask, newTaskNode); // добавим или обновим связку ID с узлом
     }
 
-    @Override
-    public List<Task> getHistory() {
+    // Получение списка задач в виде обычного списка
+    private List<Task> getTasks() {
         Node node = headHistoryNode;
         List<Task> historyViews = new ArrayList<>();
         while (node != null) {
@@ -67,18 +96,11 @@ public class InMemoryHistoryManager implements HistoryManager {
         return historyViews;
     }
 
-    @Override
-    public void remove(int taskId) {
-        Node foundNode = historyEntries.get(taskId); // ищем узел в связке
-        if (foundNode == null) {
-            return;
-        }
-        removeNode(foundNode);
-        historyEntries.remove(taskId);
-    }
-
     // метод для удаления узла из списка просмотров
     private void removeNode(Node node) {
+        if (node == null) {
+            return;
+        }
         Node prev = node.prev;
         Node next = node.next;
         if (prev != null) {

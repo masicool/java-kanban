@@ -22,10 +22,6 @@ class InMemoryHistoryManagerTest {
     @BeforeEach
     void beforeEach() {
         historyManager = new InMemoryHistoryManager();
-    }
-
-    @Test
-    void getHistory() {
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
         task.setId(1);
         historyManager.add(task);
@@ -39,17 +35,62 @@ class InMemoryHistoryManagerTest {
         savedHistoryViews.add(task);
         savedHistoryViews.add(epic);
         savedHistoryViews.add(subtask);
+    }
+
+    @Test
+    void getHistory() {
         assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(), "История просмотров" +
                 " не сохраняется");
     }
 
     @Test
+    void shouldBeNullSizeAfterClear() {
+        historyManager.clear();
+        assertEquals(0, historyManager.getHistory().size(),
+                "История не удалилась");
+    }
+
+    @Test
     void shouldBeMaxMore10Tasks() {
+        historyManager.clear();
         for (int i = 1; i <= 42; i++) {
             task = new Task("Задача " + i, "Описание " + i);
             task.setId(i);
             historyManager.add(task);
         }
         assertEquals(42, historyManager.getHistory().size(), "История просмотров не ограниченна по размеру");
+    }
+
+    @Test
+    void removeNotExistTask() {
+        historyManager.remove(1237812);
+        assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(),
+                "При удалении несуществующей задачи - история просмотров изменилась");
+    }
+
+    @Test
+    void deleteTaskById() {
+        int oldSize = historyManager.getHistory().size();
+        historyManager.remove(1);
+        assertEquals(oldSize - 1, historyManager.getHistory().size(),
+                "Задача из истории просмотров не удалилась");
+    }
+
+    @Test
+    void addExistTaskId() {
+        Task task = new Task("Дубликат задачи с ID = 1", "Описание");
+        task.setId(1);
+        historyManager.add(task);
+        task = new Task("Дубликат задачи с ID = 1", "Описание");
+        task.setId(1);
+        historyManager.add(task);
+        int countTasks = 0;
+        for (Task taskItem : historyManager.getHistory()) {
+            if (taskItem.getId() == 1) {
+                countTasks++;
+            }
+        }
+        assertEquals(1, countTasks,
+                "Добавилась задача с существующим ID в историю");
     }
 }
