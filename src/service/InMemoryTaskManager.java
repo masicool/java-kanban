@@ -235,9 +235,6 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteTaskById(int id) {
-        if (!tasks.containsKey(id)) {
-            return;
-        }
         historyManager.remove(id); // удаление задачи из истории просмотров
         tasks.remove(id);
     }
