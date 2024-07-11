@@ -16,8 +16,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         public Node(Task task) {
             this.task = task;
-            this.next = null;
-            this.prev = null;
         }
     }
 
@@ -27,8 +25,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     public InMemoryHistoryManager() {
         historyEntries = new HashMap<>();
-        headHistoryNode = null;
-        tailHistoryNode = null;
     }
 
     @Override
