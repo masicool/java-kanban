@@ -29,7 +29,18 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        linkLast(task);
+        if (task == null) {
+            return;
+        }
+
+        int idNewTask = task.getId(); // вспомогательная переменная, так как много обращений
+        Node foundNode = historyEntries.get(idNewTask); // ищем узел в связке
+        if (foundNode != null) { // если задача с id в истории уже есть, то ее удаляем их списка
+            removeNode(foundNode);
+        }
+
+        linkLast(task); // добавим ноду в конец списка
+        historyEntries.put(idNewTask, tailHistoryNode); // добавим или обновим связку ID с узлом
     }
 
     @Override
@@ -50,12 +61,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             return;
         }
 
-        int idNewTask = task.getId(); // вспомогательная переменная, так как много обращений
-        Node foundNode = historyEntries.get(idNewTask); // ищем узел в связке
-        if (foundNode != null) { // если задача с id в истории уже есть, то ее удаляем их списка
-            removeNode(foundNode);
-        }
-
         Node newTaskNode = new Node(task); // создаем новый узел
 
         if (tailHistoryNode == null) { // если список пустой, то новый узел - это и начало и конец списка
@@ -65,7 +70,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             tailHistoryNode.next = newTaskNode;
         }
         tailHistoryNode = newTaskNode;
-        historyEntries.put(idNewTask, newTaskNode); // добавим или обновим связку ID с узлом
     }
 
     // Получение списка задач в виде обычного списка
