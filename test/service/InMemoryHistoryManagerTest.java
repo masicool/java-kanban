@@ -97,4 +97,28 @@ class InMemoryHistoryManagerTest {
         assertEquals(1, countTasks,
                 "Добавилась задача с существующим ID в историю");
     }
+
+    @Test
+    void deleteFirstTask() {
+        historyManager.remove(1);
+        savedHistoryViews.removeFirst();
+        assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(),
+                "Изменился порядок в истории после удалении первой задачи");
+    }
+
+    @Test
+    void deleteTaskFromMiddle() {
+        historyManager.remove(2);
+        savedHistoryViews.remove(1);
+        assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(),
+                "Изменился порядок в истории после удалении задачи из середины");
+    }
+
+    @Test
+    void deleteLastTask() {
+        historyManager.remove(3);
+        savedHistoryViews.removeLast();
+        assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(),
+                "Изменился порядок в истории после удалении последней задачи");
+    }
 }
