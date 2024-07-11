@@ -47,15 +47,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         historyEntries.remove(taskId);
     }
 
-    // очистка истории просмотров
-    @Override
-    public void clear() {
-        for (Node node : historyEntries.values()) {
-            removeNode(node);
-        }
-        historyEntries.clear();
-    }
-
     // добавление задачи в конец списка
     private void linkLast(Task task) {
         if (task == null) {
