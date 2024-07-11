@@ -62,13 +62,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         Node newTaskNode = new Node(task); // создаем новый узел
 
         if (tailHistoryNode == null) { // если список пустой, то новый узел - это и начало и конец списка
-            tailHistoryNode = newTaskNode;
             headHistoryNode = newTaskNode;
         } else { // иначе добавляем узел и обновляем указатель на конец списка
             newTaskNode.prev = tailHistoryNode;
             tailHistoryNode.next = newTaskNode;
-            tailHistoryNode = newTaskNode;
         }
+        tailHistoryNode = newTaskNode;
         historyEntries.put(idNewTask, newTaskNode); // добавим или обновим связку ID с узлом
     }
 
