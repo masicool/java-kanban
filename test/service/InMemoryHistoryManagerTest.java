@@ -45,14 +45,18 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void shouldBeNullSizeAfterClear() {
-        historyManager.clear();
+        historyManager.remove(1);
+        historyManager.remove(2);
+        historyManager.remove(3);
         assertEquals(0, historyManager.getHistory().size(),
                 "История не удалилась");
     }
 
     @Test
     void shouldBeMaxMore10Tasks() {
-        historyManager.clear();
+        historyManager.remove(1);
+        historyManager.remove(2);
+        historyManager.remove(3);
         for (int i = 1; i <= 42; i++) {
             task = new Task("Задача " + i, "Описание " + i);
             task.setId(i);
