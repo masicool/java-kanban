@@ -40,9 +40,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int taskId) {
         Node foundNode = historyEntries.get(taskId); // ищем узел в связке
-        if (foundNode == null) {
-            return;
-        }
         removeNode(foundNode);
         historyEntries.remove(taskId);
     }
