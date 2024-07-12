@@ -34,10 +34,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         int idNewTask = task.getId(); // вспомогательная переменная, так как много обращений
-        Node foundNode = historyEntries.get(idNewTask); // ищем узел в связке
-        if (foundNode != null) { // если задача с id в истории уже есть, то ее удаляем их списка
-            removeNode(foundNode);
-        }
+        removeNode(historyEntries.get(idNewTask));
 
         linkLast(task); // добавим ноду в конец списка
         historyEntries.put(idNewTask, tailHistoryNode); // добавим или обновим связку ID с узлом
