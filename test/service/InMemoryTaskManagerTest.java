@@ -7,6 +7,8 @@ import model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
@@ -59,6 +61,16 @@ class InMemoryTaskManagerTest {
         int tmpId = task.getId();
         taskManager.deleteTaskById(tmpId);
         assertNull(taskManager.getTaskById(tmpId), "Задача не удалена из списка задач");
+    }
+
+    @Test
+    void deleteSubtask() {
+        Subtask tmpSubtask = taskManager.getSubtaskById(3);
+        Epic tmpEpic = taskManager.getEpicById(tmpSubtask.getEpicId());
+        taskManager.deleteSubtaskById(3);
+        Collection<Subtask> subtasks = taskManager.getEpicSubtasks(tmpEpic);
+        assertFalse(subtasks != null && subtasks.contains(tmpSubtask), "При удалении подзадачи, она не удалилась в " +
+                "эпике");
     }
 
     @Test
