@@ -331,11 +331,37 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Генерация нового идентификатора задачи
+     * с проверкой id по всем спискам
+     *
+     * @return ID задачи
+     */
+    public int getNextId() {
+        while (tasks.containsKey(taskId + 1) || epics.containsKey(taskId + 1)
+                || subtasks.containsKey(taskId + 1)) {
+            taskId++;
+        }
+        return ++taskId;
+    }
+
+    // Генерация нового идентификатора задачи
+    // с учетом того, что у задачи уже может быть задан ID
+    private boolean setId(Task task) {
+        // если у задачи задан ID, то используем этот ID при добавлении в список
+        if (task.getId() == 0) {
+            task.setId(getNextId());
+            return true;
+        }
+        // возврат false, если уже есть такой ID
+        return !tasks.containsKey(task.getId());
+    }
+
+    /**
      * Обновление статуса эпика
      *
      * @param epic эпика
      */
-    public void updateEpicStatus(Epic epic) {
+    private void updateEpicStatus(Epic epic) {
         if (!epics.containsKey(epic.getId())) {
             return;
         }
@@ -363,31 +389,5 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
-    }
-
-    /**
-     * Генерация нового идентификатора задачи
-     * с проверкой id по всем спискам
-     *
-     * @return ID задачи
-     */
-    public int getNextId() {
-        while (tasks.containsKey(taskId + 1) || epics.containsKey(taskId + 1)
-                || subtasks.containsKey(taskId + 1)) {
-            taskId++;
-        }
-        return ++taskId;
-    }
-
-    // Генерация нового идентификатора задачи
-    // с учетом того, что у задачи уже может быть задан ID
-    private boolean setId(Task task) {
-        // если у задачи задан ID, то используем этот ID при добавлении в список
-        if (task.getId() == 0) {
-            task.setId(getNextId());
-            return true;
-        }
-        // возврат false, если уже есть такой ID
-        return !tasks.containsKey(task.getId());
     }
 }
