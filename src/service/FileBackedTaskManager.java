@@ -12,6 +12,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
+    private String path;
+
+    FileBackedTaskManager(String fileName) {
+        setPath(fileName);
+    }
+
     public static void main(String[] args) {
         FileBackedTaskManager taskManager = new FileBackedTaskManager("tasks.csv");
 
@@ -41,20 +47,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     }
 
-    private String path;
-
-    FileBackedTaskManager(String fileName) {
-        setPath(fileName);
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public static FileBackedTaskManager loadFromFile(String fileName) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
         if (Files.notExists(Paths.get(fileBackedTaskManager.getPath()))) {
@@ -66,6 +58,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return fileBackedTaskManager;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 
     /**
      * Добавление обычной задачи
@@ -194,6 +193,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      */
     private void save() {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(getPath(), StandardCharsets.UTF_8))) {
+            fileWriter.write("type,id,name,description,status,epic");
+            fileWriter.newLine();
             for (Task task : getTasks()) {
                 fileWriter.write(task.toCsvString());
             }
