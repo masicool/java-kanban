@@ -99,4 +99,14 @@ public class Subtask extends Task {
                 ", status=" + getStatus() +
                 ", epicId=" + epicId + "}";
     }
+
+    @Override
+    public String toCsvString() {
+        return "SUBTASK," +
+                getId() + "," +
+                getName() + "," +
+                getDescription() + "," +
+                getStatus() + "," +
+                epicId + "\n";
+    }
 }

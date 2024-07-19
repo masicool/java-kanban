@@ -134,4 +134,12 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", status=" + status + "}";
     }
+
+    public String toCsvString() {
+        return "TASK," +
+                getId() + "," +
+                getName() + "," +
+                getDescription() + "," +
+                getStatus() + ",\n";
+    }
 }

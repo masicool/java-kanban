@@ -95,4 +95,13 @@ public class Epic extends Task {
                 ", status=" + getStatus() +
                 ", subTasksId=" + Arrays.toString(subTasksId.toArray()) + "}";
     }
+
+    @Override
+    public String toCsvString() {
+        return "EPIC," +
+                getId() + "," +
+                getName() + "," +
+                getDescription() + "," +
+                getStatus() + ",\n";
+    }
 }

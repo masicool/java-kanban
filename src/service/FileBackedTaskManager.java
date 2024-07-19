@@ -195,16 +195,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(getPath(), StandardCharsets.UTF_8))) {
             for (Task task : getTasks()) {
-                fileWriter.write(task.toString());
-                fileWriter.newLine();
+                fileWriter.write(task.toCsvString());
             }
             for (Task task : getEpics()) {
-                fileWriter.write(task.toString());
-                fileWriter.newLine();
+                fileWriter.write(task.toCsvString());
             }
             for (Task task : getSubtasks()) {
-                fileWriter.write(task.toString());
-                fileWriter.newLine();
+                fileWriter.write(task.toCsvString());
             }
         } catch (IOException e) {
             System.out.println("Произошла ошибка во время записи файла.");
