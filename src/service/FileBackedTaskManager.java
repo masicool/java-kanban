@@ -55,6 +55,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         // создадим копию менеджера из файла сохранения, предварительно скопировав файл
         Files.copy(Path.of("tasks.csv"), Path.of("taskscopy.csv"), StandardCopyOption.REPLACE_EXISTING);
         FileBackedTaskManager taskManagerFromFile = FileBackedTaskManager.loadFromFile("taskscopy.csv");
+        if (taskManagerFromFile == null) return;
 
         // выведем в терминал списки задач оригинала и копии и убедимся, что в копии те же задачи
         System.out.println(taskManager.getTasks());
