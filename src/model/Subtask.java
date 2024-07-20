@@ -53,6 +53,20 @@ public class Subtask extends Task {
     }
 
     /**
+     * Конструктор объекта
+     *
+     * @param id          id подзадачи
+     * @param name        имя подзадачи
+     * @param description описание подзадачи
+     * @param status      статус подзадачи
+     * @param epicId      id Эпика
+     */
+    public Subtask(int id, String name, String description, Status status, int epicId) {
+        super(id, name, description, status);
+        this.epicId = epicId;
+    }
+
+    /**
      * Конструктор для глубокого копирования объекта
      *
      * @param subtask объект

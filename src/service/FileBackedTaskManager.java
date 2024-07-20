@@ -1,18 +1,20 @@
 package service;
 
 import model.Epic;
+import model.Status;
 import model.Subtask;
 import model.Task;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    private String path;
+    public static final int NUMBER_OF_FIELDS_IN_CSV_FILE = 6; // максимальное кол-во полей в файле CSV
+    public static final String CSV_SEPARATOR = ","; // разделитель между полями файла CSV
+    private String path; // путь и наименование файла для сохранения
 
     FileBackedTaskManager(String fileName) {
         setPath(fileName);
@@ -53,7 +55,84 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             return null;
         }
 
-        // дописать чтение из файла
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
+            // чтение заголовка файла (первой строки)
+            String firstLine = fileReader.readLine();
+            String[] split = firstLine.split(CSV_SEPARATOR);
+            int[] orderOfFields = new int[NUMBER_OF_FIELDS_IN_CSV_FILE]; // порядок полей в файле
+
+            // заполним массив порядка полей в файле начальным значением -1 для последующей проверки
+            Arrays.fill(orderOfFields, -1);
+
+            // порядок полей в файле CSV может быть разный, но количество полей должно совпадать
+            for (int i = 0; i < split.length; i++) {
+                switch (split[i]) {
+                    case "type" -> orderOfFields[0] = i;
+                    case "id" -> orderOfFields[1] = i;
+                    case "name" -> orderOfFields[2] = i;
+                    case "description" -> orderOfFields[3] = i;
+                    case "status" -> orderOfFields[4] = i;
+                    case "epic" -> orderOfFields[5] = i;
+                    default -> System.out.println("Ошибка в формате файла CSV!");
+                }
+            }
+
+            // порядок следования каждого поля в файле должен быть установлен, иначе ошибка формата
+            for (int orderOfField : orderOfFields) {
+                if (orderOfField == -1) {
+                    System.out.println("Ошибка в формате файла CSV!");
+                    break;
+                }
+            }
+
+            // читаем построчно файл, разбираем строки и создаем задачи
+            while (fileReader.ready()) {
+                String[] splitLine = fileReader.readLine().split(CSV_SEPARATOR);
+                int id;
+                try {
+                    id = Integer.parseInt(splitLine[orderOfFields[1]]);
+                    if (id <= 0) {
+                        throw new NumberFormatException();
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Ошибка в формате файла CSV!");
+                    return null;
+                }
+
+                Status status = null;
+                switch (splitLine[orderOfFields[4]]) {
+                    case "NEW" -> status = Status.NEW;
+                    case "IN_PROGRESS" -> status = Status.IN_PROGRESS;
+                    case "DONE" -> status = Status.DONE;
+                    default -> System.out.println("Ошибка в формате файла CSV!");
+                }
+
+                switch (splitLine[orderOfFields[0]]) {
+                    case "TASK" -> fileBackedTaskManager.addTask(new Task(id, splitLine[orderOfFields[2]],
+                            splitLine[orderOfFields[3]], status));
+                    case "EPIC" -> fileBackedTaskManager.addEpic(new Epic(id, splitLine[orderOfFields[2]],
+                            splitLine[orderOfFields[3]], status));
+                    case "SUBTASK" -> {
+                        int epicId;
+                        try {
+                            epicId = Integer.parseInt(splitLine[orderOfFields[5]]);
+                            if (epicId <= 0) {
+                                throw new NumberFormatException();
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Ошибка в формате файла CSV!");
+                            return null;
+                        }
+
+                        fileBackedTaskManager.addSubtask(new Subtask(id, splitLine[orderOfFields[2]],
+                                splitLine[orderOfFields[3]], status, epicId));
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("Произошла ошибка во время записи файла.");
+        }
 
         return fileBackedTaskManager;
     }
@@ -207,6 +286,5 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (IOException e) {
             System.out.println("Произошла ошибка во время записи файла.");
         }
-
     }
 }

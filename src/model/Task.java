@@ -33,6 +33,19 @@ public class Task {
     }
 
     /**
+     * Конструктор объекта с установкой всех полей
+     *
+     * @param id          id задачи
+     * @param name        наименование задачи
+     * @param description описание задачи
+     * @param status      статус задачи
+     */
+    public Task(int id, String name, String description, Status status) {
+        this(name, description, status);
+        this.id = id;
+    }
+
+    /**
      * Конструктор для глубокого копирования объекта
      *
      * @param task объект
