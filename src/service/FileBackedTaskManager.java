@@ -25,48 +25,58 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     // еще один main для тестирования класса
-    public static void main(String[] args) throws IOException {
-        FileBackedTaskManager taskManager = new FileBackedTaskManager("tasks.csv");
+    public static void main(String[] args) {
+        FileBackedTaskManager taskManager;
 
-        Task task;
-        Epic epic;
-        Subtask subtask;
+        try {
+            taskManager = new FileBackedTaskManager("tasks.csv");
+            Task task;
+            Epic epic;
+            Subtask subtask;
 
-        // создадим две задачи
-        task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
-        taskManager.addTask(task); // id будет = 1
-        task = new Task("Сварить борщ", "Найти рецепт борща");
-        taskManager.addTask(task); // id будет = 2
+            // создадим две задачи
+            task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
+            taskManager.addTask(task); // id будет = 1
+            task = new Task("Сварить борщ", "Найти рецепт борща");
+            taskManager.addTask(task); // id будет = 2
 
-        // создадим эпик с тремя подзадачами
-        epic = new Epic("Переезд", "Переезд на новую квартиру");
-        taskManager.addEpic(epic); // id будет = 3
-        subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
-        taskManager.addSubtask(subtask); // id будет = 4
-        subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
-        taskManager.addSubtask(subtask); // id будет = 5
-        subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
-        taskManager.addSubtask(subtask); // id будет = 6
+            // создадим эпик с тремя подзадачами
+            epic = new Epic("Переезд", "Переезд на новую квартиру");
+            taskManager.addEpic(epic); // id будет = 3
+            subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
+            taskManager.addSubtask(subtask); // id будет = 4
+            subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
+            taskManager.addSubtask(subtask); // id будет = 5
+            subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
+            taskManager.addSubtask(subtask); // id будет = 6
 
-        // создадим эпик без подзадач
-        epic = new Epic("Помыть окна", "Помыть окна после зимы");
-        taskManager.addEpic(epic); // id будет = 7
+            // создадим эпик без подзадач
+            epic = new Epic("Помыть окна", "Помыть окна после зимы");
+            taskManager.addEpic(epic); // id будет = 7
 
-        // создадим копию менеджера из файла сохранения, предварительно скопировав файл
-        Files.copy(Path.of("tasks.csv"), Path.of("taskscopy.csv"), StandardCopyOption.REPLACE_EXISTING);
-        FileBackedTaskManager taskManagerFromFile = FileBackedTaskManager.loadFromFile("taskscopy.csv");
-        if (taskManagerFromFile == null) return;
+            // создадим копию менеджера из файла сохранения, предварительно скопировав файл
+            try {
+                Files.copy(Path.of("tasks.csv"), Path.of("taskscopy.csv"), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException | RuntimeException e) {
+                throw new ManagerSaveException("Ошибка копирования файла!");
+            }
 
-        // выведем в терминал списки задач оригинала и копии и убедимся, что в копии те же задачи
-        System.out.println(taskManager.getTasks());
-        System.out.println(taskManagerFromFile.getTasks());
-        System.out.println();
-        System.out.println(taskManager.getEpics());
-        System.out.println(taskManagerFromFile.getEpics());
-        System.out.println();
-        System.out.println(taskManager.getSubtasks());
-        System.out.println(taskManagerFromFile.getSubtasks());
-        System.out.println();
+            FileBackedTaskManager taskManagerFromFile = FileBackedTaskManager.loadFromFile("taskscopy.csv");
+            if (taskManagerFromFile == null) return;
+
+            // выведем в терминал списки задач оригинала и копии и убедимся, что в копии те же задачи
+            System.out.println(taskManager.getTasks());
+            System.out.println(taskManagerFromFile.getTasks());
+            System.out.println();
+            System.out.println(taskManager.getEpics());
+            System.out.println(taskManagerFromFile.getEpics());
+            System.out.println();
+            System.out.println(taskManager.getSubtasks());
+            System.out.println(taskManagerFromFile.getSubtasks());
+            System.out.println();
+        } catch (ManagerSaveException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**
@@ -84,16 +94,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager("");
 
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
-            // чтение заголовка файла (первой строки)
-            String firstLine = fileReader.readLine();
+        try (LineNumberReader fileReader = new LineNumberReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
+            // чтение и проверка заголовка файла (первой строки)
+            String firstLine = fileReader.readLine().trim();
+            if (firstLine.isBlank()) throw new ManagerSaveException("Поврежден заголовок файла CSV!");
+
             String[] split = firstLine.split(CSV_SEPARATOR);
             int[] orderOfFields = new int[NUMBER_OF_FIELDS_IN_CSV_FILE]; // порядок полей в файле
 
             // заполним массив порядка полей в файле начальным значением -1 для последующей проверки
             Arrays.fill(orderOfFields, -1);
 
-            // порядок полей в файле CSV может быть разный, но количество полей должно совпадать
+            // порядок полей в файле CSV может быть произвольный, но количество полей должно совпадать
             for (int i = 0; i < split.length; i++) {
                 switch (split[i]) {
                     case "type" -> orderOfFields[0] = i;
@@ -102,15 +114,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     case "description" -> orderOfFields[3] = i;
                     case "status" -> orderOfFields[4] = i;
                     case "epic" -> orderOfFields[5] = i;
-                    default -> System.out.println("Ошибка в формате файла CSV!");
+                    default -> throw new ManagerSaveException("Поврежден заголовок файла CSV!");
                 }
             }
 
             // порядок следования каждого поля в файле должен быть установлен, иначе ошибка формата
             for (int orderOfField : orderOfFields) {
                 if (orderOfField == -1) {
-                    System.out.println("Ошибка в формате файла CSV!");
-                    break;
+                    throw new ManagerSaveException("Поврежден заголовка файла CSV!");
                 }
             }
 
@@ -123,47 +134,49 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 try {
                     id = Integer.parseInt(splitLine[orderOfFields[1]]);
                     if (id <= 0) {
-                        throw new NumberFormatException();
+                        throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
+                                ": ID задачи должен быть больше нуля!");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("Ошибка в формате файла CSV!");
-                    return null;
+                    throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
+                            ": ID задачи должен быть числом!");
                 }
 
                 // проверяем поле статуса на корректность
-                Status status = null;
+                Status status;
                 switch (splitLine[orderOfFields[4]]) {
                     case "NEW" -> status = Status.NEW;
                     case "IN_PROGRESS" -> status = Status.IN_PROGRESS;
                     case "DONE" -> status = Status.DONE;
-                    default -> System.out.println("Ошибка в формате файла CSV!");
+                    default -> throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
+                            ": не корректно указан статус задачи!");
                 }
 
                 switch (splitLine[orderOfFields[0]]) {
-                    case "TASK" ->
-                            fileBackedTaskManager.addTask(new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status));
-                    case "EPIC" ->
-                            fileBackedTaskManager.addEpic(new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status));
+                    case "TASK" -> fileBackedTaskManager.addTask(new Task(id, splitLine[orderOfFields[2]],
+                            splitLine[orderOfFields[3]], status));
+                    case "EPIC" -> fileBackedTaskManager.addEpic(new Epic(id, splitLine[orderOfFields[2]],
+                            splitLine[orderOfFields[3]], status));
                     case "SUBTASK" -> {
                         // проверяем id эпика на корректность
                         int epicId;
                         try {
                             epicId = Integer.parseInt(splitLine[orderOfFields[5]]);
                             if (epicId <= 0) {
-                                throw new NumberFormatException();
+                                throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
+                                        ": ID эпика подзадачи должен быть больше нуля!");
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("Ошибка в формате файла CSV!");
-                            return null;
+                            throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
+                                    ": ID эпика подзадачи должен быть числом!");
                         }
 
                         fileBackedTaskManager.addSubtask(new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId));
                     }
                 }
             }
-
         } catch (IOException e) {
-            System.out.println("Произошла ошибка во время записи файла.");
+            throw new ManagerSaveException("Ошибка чтения файла!");
         }
 
         fileBackedTaskManager.setPath(fileName);
@@ -319,7 +332,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileWriter.write(task.toCsvString());
             }
         } catch (IOException e) {
-            System.out.println("Произошла ошибка во время записи файла.");
+            throw new ManagerSaveException("Ошибка записи файла!");
         }
     }
 }
