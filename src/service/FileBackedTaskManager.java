@@ -8,7 +8,9 @@ import model.Task;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -17,10 +19,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private String path; // путь и наименование файла для сохранения
 
     FileBackedTaskManager(String fileName) {
-        setPath(fileName);
+        if (!fileName.isBlank()) {
+            setPath(fileName);
+        }
     }
 
-    public static void main(String[] args) {
+    // еще один main для тестирования класса
+    public static void main(String[] args) throws IOException {
         FileBackedTaskManager taskManager = new FileBackedTaskManager("tasks.csv");
 
         Task task;
@@ -38,7 +43,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         taskManager.addEpic(epic); // id будет = 3
         subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
         taskManager.addSubtask(subtask); // id будет = 4
-        subtask = new Subtask(epic, "Кот", "Поймать кота, упаковать");
+        subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
         taskManager.addSubtask(subtask); // id будет = 5
         subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
         taskManager.addSubtask(subtask); // id будет = 6
@@ -47,13 +52,36 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         epic = new Epic("Помыть окна", "Помыть окна после зимы");
         taskManager.addEpic(epic); // id будет = 7
 
+        // создадим копию менеджера из файла сохранения, предварительно скопировав файл
+        Files.copy(Path.of("tasks.csv"), Path.of("taskscopy.csv"), StandardCopyOption.REPLACE_EXISTING);
+        FileBackedTaskManager taskManagerFromFile = FileBackedTaskManager.loadFromFile("taskscopy.csv");
+
+        // выведем в терминал списки задач оригинала и копии и убедимся, что в копии те же задачи
+        System.out.println(taskManager.getTasks());
+        System.out.println(taskManagerFromFile.getTasks());
+        System.out.println();
+        System.out.println(taskManager.getEpics());
+        System.out.println(taskManagerFromFile.getEpics());
+        System.out.println();
+        System.out.println(taskManager.getSubtasks());
+        System.out.println(taskManagerFromFile.getSubtasks());
+        System.out.println();
     }
 
+    /**
+     * Создание менеджера задач и загрузка его задачами из файла CSV
+     * в первой строке файл - заголовок со списком всех полей для загрузки-выгрузки
+     * (порядок полей может быть произвольным)
+     *
+     * @param fileName файл с задачами в формате CSV
+     * @return менеджер задач
+     */
     public static FileBackedTaskManager loadFromFile(String fileName) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
-        if (Files.notExists(Paths.get(fileBackedTaskManager.getPath()))) {
+        if (Files.notExists(Paths.get(fileName))) {
             return null;
         }
+
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager("");
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
             // чтение заголовка файла (первой строки)
@@ -88,6 +116,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             // читаем построчно файл, разбираем строки и создаем задачи
             while (fileReader.ready()) {
                 String[] splitLine = fileReader.readLine().split(CSV_SEPARATOR);
+
+                // проверяем id задачи на корректность
                 int id;
                 try {
                     id = Integer.parseInt(splitLine[orderOfFields[1]]);
@@ -99,6 +129,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     return null;
                 }
 
+                // проверяем поле статуса на корректность
                 Status status = null;
                 switch (splitLine[orderOfFields[4]]) {
                     case "NEW" -> status = Status.NEW;
@@ -108,11 +139,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
 
                 switch (splitLine[orderOfFields[0]]) {
-                    case "TASK" -> fileBackedTaskManager.addTask(new Task(id, splitLine[orderOfFields[2]],
-                            splitLine[orderOfFields[3]], status));
-                    case "EPIC" -> fileBackedTaskManager.addEpic(new Epic(id, splitLine[orderOfFields[2]],
-                            splitLine[orderOfFields[3]], status));
+                    case "TASK" ->
+                            fileBackedTaskManager.addTask(new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status));
+                    case "EPIC" ->
+                            fileBackedTaskManager.addEpic(new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status));
                     case "SUBTASK" -> {
+                        // проверяем id эпика на корректность
                         int epicId;
                         try {
                             epicId = Integer.parseInt(splitLine[orderOfFields[5]]);
@@ -124,8 +156,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                             return null;
                         }
 
-                        fileBackedTaskManager.addSubtask(new Subtask(id, splitLine[orderOfFields[2]],
-                                splitLine[orderOfFields[3]], status, epicId));
+                        fileBackedTaskManager.addSubtask(new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId));
                     }
                 }
             }
@@ -134,6 +165,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             System.out.println("Произошла ошибка во время записи файла.");
         }
 
+        fileBackedTaskManager.setPath(fileName);
         return fileBackedTaskManager;
     }
 
@@ -271,6 +303,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * Метод сохранения состояния менеджера в файл со всеми задачами
      */
     private void save() {
+        if (getPath() == null || getPath().isBlank()) return;
+
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(getPath(), StandardCharsets.UTF_8))) {
             fileWriter.write("type,id,name,description,status,epic");
             fileWriter.newLine();

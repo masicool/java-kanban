@@ -26,7 +26,7 @@ public class Main {
         taskManager.addEpic(epic); // id будет = 3
         subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
         taskManager.addSubtask(subtask); // id будет = 4
-        subtask = new Subtask(epic, "Кот", "Поймать кота, упаковать");
+        subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
         taskManager.addSubtask(subtask); // id будет = 5
         subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
         taskManager.addSubtask(subtask); // id будет = 6
