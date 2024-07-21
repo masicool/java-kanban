@@ -12,6 +12,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node> historyEntries;
     private Node headHistoryNode; // указатель на начало списка истории просмотров
     private Node tailHistoryNode; // указатель на конец списка истории просмотров
+
     public InMemoryHistoryManager() {
         historyEntries = new HashMap<>();
     }
