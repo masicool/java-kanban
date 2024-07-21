@@ -80,6 +80,5 @@ public class Main {
         for (T item : tasks) {
             System.out.println(item);
         }
-
     }
 }

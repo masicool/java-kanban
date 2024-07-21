@@ -117,21 +117,21 @@ public class Task {
     }
 
     /**
-     * Установка ID задачи
-     *
-     * @param id ID задачи
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /**
      * Получение ID задачи
      *
      * @return ID задачи
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Установка ID задачи
+     *
+     * @param id ID задачи
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
