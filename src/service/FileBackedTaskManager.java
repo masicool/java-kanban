@@ -96,8 +96,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (LineNumberReader fileReader = new LineNumberReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
             // чтение и проверка заголовка файла (первой строки)
-            String firstLine = fileReader.readLine().trim();
-            if (firstLine.isBlank()) throw new ManagerSaveException("Поврежден заголовок файла CSV!");
+            if (!fileReader.ready()) throw new ManagerSaveException("Файл пустой!");
+
+            String firstLine = fileReader.readLine();
+            if (firstLine.isBlank()) throw new ManagerSaveException("Поврежден заголовок файла CSV: пустая первая" +
+                    " строка!");
 
             String[] split = firstLine.split(CSV_SEPARATOR);
             int[] orderOfFields = new int[NUMBER_OF_FIELDS_IN_CSV_FILE]; // порядок полей в файле
@@ -114,14 +117,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     case "description" -> orderOfFields[3] = i;
                     case "status" -> orderOfFields[4] = i;
                     case "epic" -> orderOfFields[5] = i;
-                    default -> throw new ManagerSaveException("Поврежден заголовок файла CSV!");
+                    default -> throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле!");
                 }
             }
 
             // порядок следования каждого поля в файле должен быть установлен, иначе ошибка формата
             for (int orderOfField : orderOfFields) {
                 if (orderOfField == -1) {
-                    throw new ManagerSaveException("Поврежден заголовка файла CSV!");
+                    throw new ManagerSaveException("Поврежден заголовка файла CSV: не хватает полей!");
                 }
             }
 
@@ -173,6 +176,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                         fileBackedTaskManager.addSubtask(new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId));
                     }
+                    default -> throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
+                            ": не корректно указан тип задачи!");
                 }
             }
         } catch (IOException e) {
@@ -320,8 +325,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (getPath() == null || getPath().isBlank()) return;
 
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(getPath(), StandardCharsets.UTF_8))) {
-            fileWriter.write("type,id,name,description,status,epic");
-            fileWriter.newLine();
+            fileWriter.write("type,id,name,description,status,epic\n");
             for (Task task : getTasks()) {
                 fileWriter.write(task.toCsvString());
             }
