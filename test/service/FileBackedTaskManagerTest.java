@@ -27,10 +27,10 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void shouldBeNullWhenFileIsNotExist() {
-        FileBackedTaskManager fileBackedTaskManager = FileBackedTaskManager.loadFromFile("tmp.csv");
-        assertNull(fileBackedTaskManager, "Объект FileBackedTaskManager не должен быть создан если нет указанного " +
-                "файла.");
+    void shouldBeExceptionWhenFileIsNotExist() throws IOException {
+        file.close();
+        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile("something.csv"));
+        assertNotNull(thrown.getMessage(), "Ошибка чтения файла!");
     }
 
     @Test

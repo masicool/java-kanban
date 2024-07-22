@@ -87,7 +87,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * @return менеджер задач
      */
     public static FileBackedTaskManager loadFromFile(String fileName) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager("");
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
 
         try (LineNumberReader fileReader = new LineNumberReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
             // чтение и проверка заголовка файла (первой строки)
@@ -184,7 +184,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new ManagerSaveException("Ошибка чтения файла!");
         }
 
-        fileBackedTaskManager.path = fileName;
         return fileBackedTaskManager;
     }
 
