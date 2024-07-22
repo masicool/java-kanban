@@ -20,7 +20,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     FileBackedTaskManager(String fileName) {
         if (!fileName.isBlank()) {
-            setPath(fileName);
+            path = fileName;
         }
     }
 
@@ -189,16 +189,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new ManagerSaveException("Ошибка чтения файла!");
         }
 
-        fileBackedTaskManager.setPath(fileName);
+        fileBackedTaskManager.path = fileName;
         return fileBackedTaskManager;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     /**
@@ -327,9 +319,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * Метод сохранения состояния менеджера в файл со всеми задачами
      */
     private void save() {
-        if (getPath() == null || getPath().isBlank()) return;
+        if (path == null || path.isBlank()) return;
 
-        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(getPath(), StandardCharsets.UTF_8))) {
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8))) {
             fileWriter.write("type,id,name,description,status,epic\n");
             for (Task task : getTasks()) {
                 fileWriter.write(task.toCsvString());
