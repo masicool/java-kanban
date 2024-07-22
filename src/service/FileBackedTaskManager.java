@@ -319,8 +319,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * Метод сохранения состояния менеджера в файл со всеми задачами
      */
     private void save() {
-        if (path == null || path.isBlank()) return;
-
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8))) {
             fileWriter.write("type,id,name,description,status,epic\n");
             for (Task task : getTasks()) {
