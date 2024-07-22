@@ -156,10 +156,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
 
                 switch (splitLine[orderOfFields[0]]) {
-                    case "TASK" -> fileBackedTaskManager.addTask(new Task(id, splitLine[orderOfFields[2]],
-                            splitLine[orderOfFields[3]], status));
-                    case "EPIC" -> fileBackedTaskManager.addEpic(new Epic(id, splitLine[orderOfFields[2]],
-                            splitLine[orderOfFields[3]], status));
+                    case "TASK" -> {
+                        Task task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
+                        fileBackedTaskManager.tasks.put(id, task);
+                    }
+                    case "EPIC" -> {
+                        Epic epic = new Epic(id, splitLine[orderOfFields[2]],splitLine[orderOfFields[3]], status);
+                        fileBackedTaskManager.epics.put(id, epic);
+                    }
                     case "SUBTASK" -> {
                         // проверяем id эпика на корректность
                         int epicId;
@@ -174,7 +178,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                                     ": ID эпика подзадачи должен быть числом!");
                         }
 
-                        fileBackedTaskManager.addSubtask(new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId));
+                        Subtask subtask = new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId);
+                        fileBackedTaskManager.subtasks.put(id, subtask);
                     }
                     default -> throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
                             ": не корректно указан тип задачи!");
