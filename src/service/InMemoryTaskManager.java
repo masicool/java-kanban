@@ -8,9 +8,9 @@ import model.Task;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Integer, Task> tasks; // список обычных задач
-    private final HashMap<Integer, Epic> epics; // список эпиков
-    private final HashMap<Integer, Subtask> subtasks; // список подзадач
+    protected final HashMap<Integer, Task> tasks; // список обычных задач
+    protected final HashMap<Integer, Epic> epics; // список эпиков
+    protected final HashMap<Integer, Subtask> subtasks; // список подзадач
     private final HistoryManager historyManager; // объект класса для работы с историей просмотров
     private int taskId; // уникальный идентификатор задачи
 
