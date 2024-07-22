@@ -9,7 +9,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
@@ -88,10 +87,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * @return менеджер задач
      */
     public static FileBackedTaskManager loadFromFile(String fileName) {
-        if (Files.notExists(Paths.get(fileName))) {
-            return null;
-        }
-
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager("");
 
         try (LineNumberReader fileReader = new LineNumberReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
@@ -161,7 +156,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         fileBackedTaskManager.tasks.put(id, task);
                     }
                     case "EPIC" -> {
-                        Epic epic = new Epic(id, splitLine[orderOfFields[2]],splitLine[orderOfFields[3]], status);
+                        Epic epic = new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
                         fileBackedTaskManager.epics.put(id, epic);
                     }
                     case "SUBTASK" -> {
