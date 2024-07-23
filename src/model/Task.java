@@ -92,6 +92,7 @@ public class Task {
 
     /**
      * Получение типа задачи
+     *
      * @return типа задачи
      */
     public TaskType getType() {

@@ -11,11 +11,18 @@ public class FileCsvUtils {
     private static final String CSV_SEPARATOR = ","; // разделитель между полями файла CSV
     private static final int[] orderOfFields = new int[NUMBER_OF_FIELDS_IN_CSV_FILE]; // порядок полей в файле
 
+    /**
+     * Проверка заголовка файла CSV
+     *
+     * @param fileReader ссылка на объект файоа
+     * @throws IOException возможные исключения в методе
+     */
     public static void checkHeader(BufferedReader fileReader) throws IOException {
         // чтение и проверка заголовка файла (первой строки)
         if (!fileReader.ready()) throw new ManagerSaveException("Файл пустой!");
 
         String firstLine = fileReader.readLine();
+
         if (firstLine.isBlank())
             throw new ManagerSaveException("Поврежден заголовок файла CSV: пустая первая" + " строка!");
 
@@ -46,7 +53,12 @@ public class FileCsvUtils {
         }
     }
 
-    // парсинг строки и создание задачи
+    /**
+     * Парсинг строки и создание задачи
+     *
+     * @param value строка в формате CSV
+     * @return новый объект - задача
+     */
     public static Task fromString(String value) {
         String[] splitLine = value.split(CSV_SEPARATOR);
         int id = parseIdFromString(splitLine[orderOfFields[1]]);
@@ -54,12 +66,8 @@ public class FileCsvUtils {
         Task task;
 
         switch (TaskType.valueOf(splitLine[orderOfFields[0]])) {
-            case TASK -> {
-                task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
-            }
-            case EPIC -> {
-                task = new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
-            }
+            case TASK -> task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
+            case EPIC -> task = new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
             case SUBTASK -> {
                 int epicId = parseIdFromString(splitLine[orderOfFields[5]]);
                 task = new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId);
