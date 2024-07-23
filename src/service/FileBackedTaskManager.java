@@ -84,7 +84,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static FileBackedTaskManager loadFromFile(String fileName) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
 
-        try (LineNumberReader fileReader = new LineNumberReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
 
             FileCsvUtils.checkHeader(fileReader); // проверяем заголовок файла
 

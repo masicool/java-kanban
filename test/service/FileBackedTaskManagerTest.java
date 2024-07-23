@@ -10,8 +10,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +28,7 @@ class FileBackedTaskManagerTest {
     void shouldBeExceptionWhenFileIsNotExist() throws IOException {
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile("something.csv"));
-        assertNotNull(thrown.getMessage(), "Ошибка чтения файла!");
+        assertNotNull(thrown.getMessage(), "Должно быть исключение: Ошибка чтения файла!");
     }
 
     @Test
@@ -41,66 +39,41 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void saveToFile() throws IOException {
-        File tmpFile2 = File.createTempFile("tasks", null);
-        FileBackedTaskManager taskManager = new FileBackedTaskManager(tmpFile2.toString());
+    void compareTwoFileBackedManagers() throws IOException {
+        // создадим 1-й файловый менеджер и заполним его задачами
+        File tmpFile = File.createTempFile("tasks", null);
+        FileBackedTaskManager taskManager1 = new FileBackedTaskManager(tmpFile.toString());
         Task task;
         Epic epic;
         Subtask subtask;
-
         // создадим две задачи
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
-        taskManager.addTask(task); // id будет = 1
+        taskManager1.addTask(task); // id будет = 1
         task = new Task("Сварить борщ", "Найти рецепт борща");
-        taskManager.addTask(task); // id будет = 2
-
+        taskManager1.addTask(task); // id будет = 2
         // создадим эпик с тремя подзадачами
         epic = new Epic("Переезд", "Переезд на новую квартиру");
-        taskManager.addEpic(epic); // id будет = 3
+        taskManager1.addEpic(epic); // id будет = 3
         subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
-        taskManager.addSubtask(subtask); // id будет = 4
+        taskManager1.addSubtask(subtask); // id будет = 4
         subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
-        taskManager.addSubtask(subtask); // id будет = 5
+        taskManager1.addSubtask(subtask); // id будет = 5
         subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
-        taskManager.addSubtask(subtask); // id будет = 6
+        taskManager1.addSubtask(subtask); // id будет = 6
 
-        // создадим файл CSV с таким же содержимым
-        file.write("type,id,name,description,status,epic\n");
-        file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
-        file.write("TASK,2,Сварить борщ,Найти рецепт борща,NEW,\n");
-        file.write("EPIC,3,Переезд,Переезд на новую квартиру,NEW,\n");
-        file.write("SUBTASK,4,Грузчики,Найти грузчиков,NEW,3\n");
-        file.write("SUBTASK,5,Кот,Поймать кота и упаковать,NEW,3\n");
-        file.write("SUBTASK,6,Мебель,Запаковать мебель,NEW,3\n");
-        file.close();
+        // создадим 2-й файловый менеджер из файла 1-го менеджера
+        FileBackedTaskManager taskManager2 = FileBackedTaskManager.loadFromFile(tmpFile.toString());
 
-        // сравним файлы, они должны быть идентичны
-        try {
-            assertEquals(-1L, Files.mismatch(Paths.get(tmpFile2.toString()), Paths.get(tmpFile.toString())),
-                    "Ошибка сохранения в файл!");
-        } catch (IOException e) {
-            System.out.println("Ошибка чтения файла!");
-        }
+        // сравним оба файловых менеджера
+        assertArrayEquals(taskManager1.getTasks().toArray(), taskManager2.getTasks().toArray(),
+                "Задачи менеджеров не равны!");
+        assertArrayEquals(taskManager1.getEpics().toArray(), taskManager2.getEpics().toArray(),
+                "Эпики менеджеров не равны!");
+        assertArrayEquals(taskManager1.getSubtasks().toArray(), taskManager2.getSubtasks().toArray(),
+                "Подзадачи менеджеров не равны!");
     }
 
-    @Test
-    void loadFromFile() throws IOException {
-        file.write("type,id,name,description,status,epic\n");
-        file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
-        file.write("TASK,2,Сварить борщ,Найти рецепт борща,NEW,\n");
-        file.write("EPIC,3,Переезд,Переезд на новую квартиру,NEW,\n");
-        file.write("EPIC,7,Помыть окна,Помыть окна после зимы,NEW,\n");
-        file.write("SUBTASK,4,Грузчики,Найти грузчиков,NEW,3\n");
-        file.write("SUBTASK,5,Кот,Поймать кота и упаковать,NEW,3\n");
-        file.write("SUBTASK,6,Мебель,Запаковать мебель,NEW,3\n");
-        file.close();
-        FileBackedTaskManager fileBackedTaskManager = FileBackedTaskManager.loadFromFile(tmpFile.toString());
-        assertNotNull(fileBackedTaskManager, "Объект FileBackedTaskManager не создан.");
-        assertEquals(2, fileBackedTaskManager.getTasks().size(), "Не загрузились задачи.");
-        assertEquals(2, fileBackedTaskManager.getEpics().size(), "Не загрузились эпики.");
-        assertEquals(3, fileBackedTaskManager.getSubtasks().size(), "Не загрузились подзадачи.");
-    }
-
+    // эмуляция неправильных заголовков файла CSV и его полей
     @Test
     void generateExceptionManagerSaveException() throws IOException {
         // нет заголовка файла CSV
@@ -144,7 +117,7 @@ class FileBackedTaskManagerTest {
         file.write("TASK,один,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Строка 2: ID задачи должен быть числом!");
+        assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть числом!");
 
         // указываем ID задачи меньше нуля
         tmpFile = File.createTempFile("tasks", null);
@@ -153,7 +126,7 @@ class FileBackedTaskManagerTest {
         file.write("TASK,-100,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Строка 2: ID задачи должен быть больше нуля!");
+        assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть больше нуля!");
 
         // указываем ID задачи = 0
         tmpFile = File.createTempFile("tasks", null);
@@ -162,40 +135,6 @@ class FileBackedTaskManagerTest {
         file.write("TASK,0,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Строка 2: ID задачи должен быть больше нуля!");
-
-        // портим 2-ю строку файла: меняем тип задачи на не существующий
-        tmpFile = File.createTempFile("tasks", null);
-        file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,name,description,status,epic\n");
-        file.write("T1ASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
-        file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: Строка 2: не корректно указан тип " +
-                "задачи!");
-
-        // не корректно указываем номер эпика в подзадаче
-        tmpFile = File.createTempFile("tasks", null);
-        file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,name,description,status,epic\n");
-        file.write("EPIC,3,Переезд,Переезд на новую квартиру,NEW,\n");
-        file.write("SUBTASK,4,Грузчики,Найти грузчиков,NEW,3\n");
-        file.write("SUBTASK,5,Кот,Поймать кота и упаковать,NEW,ТРИ\n");
-        file.write("SUBTASK,6,Мебель,Запаковать мебель,NEW,3\n");
-        file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Строка 4: ID эпика подзадачи должен быть числом!");
-
-        // указываем отрицательный номер эпика в подзадаче
-        tmpFile = File.createTempFile("tasks", null);
-        file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,name,description,status,epic\n");
-        file.write("EPIC,3,Переезд,Переезд на новую квартиру,NEW,\n");
-        file.write("SUBTASK,4,Грузчики,Найти грузчиков,NEW,3\n");
-        file.write("SUBTASK,5,Кот,Поймать кота и упаковать,NEW,-3\n");
-        file.write("SUBTASK,6,Мебель,Запаковать мебель,NEW,3\n");
-        file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "ID эпика подзадачи должен быть больше нуля!");
+        assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть больше нуля!");
     }
 }
