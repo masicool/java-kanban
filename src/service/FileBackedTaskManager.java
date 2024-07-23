@@ -1,7 +1,6 @@
 package service;
 
 import model.Epic;
-import model.Status;
 import model.Subtask;
 import model.Task;
 
@@ -89,9 +88,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             FileCsvUtils.checkHeader(fileReader); // проверяем заголовок файла
 
-            // читаем построчно файл, разбираем строки и создаем задачи
+            // читаем построчно файл, разбираем строки и создаем задачи прямо в HashMap
             while (fileReader.ready()) {
                 Task task = FileCsvUtils.fromString(fileReader.readLine());
+
+                switch (task.getType()) {
+                    case TASK -> fileBackedTaskManager.tasks.put(task.getId(), task);
+                    case EPIC -> fileBackedTaskManager.epics.put(task.getId(), (Epic) task);
+                    case SUBTASK -> {
+                        Subtask subtask = (Subtask) task;
+                        fileBackedTaskManager.subtasks.put(subtask.getId(), subtask);
+                        Epic epic = fileBackedTaskManager.epics.get(subtask.getEpicId());
+                        epic.addSubtaskId(subtask.getId()); // в эпике нужно добавить подзадачу
+                    }
+                }
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла!");

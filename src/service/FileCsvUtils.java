@@ -33,8 +33,8 @@ public class FileCsvUtils {
                 case "description" -> orderOfFields[3] = i;
                 case "status" -> orderOfFields[4] = i;
                 case "epic" -> orderOfFields[5] = i;
-                default -> throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле '" +
-                        split[i] + "'!");
+                default ->
+                        throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле '" + split[i] + "'!");
             }
         }
 
