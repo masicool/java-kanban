@@ -10,11 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    public static final int NUMBER_OF_FIELDS_IN_CSV_FILE = 6; // максимальное кол-во полей в файле CSV
-    public static final String CSV_SEPARATOR = ","; // разделитель между полями файла CSV
     private String path; // путь и наименование файла для сохранения
 
     FileBackedTaskManager(String fileName) {
@@ -89,95 +86,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
 
         try (LineNumberReader fileReader = new LineNumberReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
-            // чтение и проверка заголовка файла (первой строки)
-            if (!fileReader.ready()) throw new ManagerSaveException("Файл пустой!");
 
-            String firstLine = fileReader.readLine();
-            if (firstLine.isBlank()) throw new ManagerSaveException("Поврежден заголовок файла CSV: пустая первая" +
-                    " строка!");
-
-            String[] split = firstLine.split(CSV_SEPARATOR);
-            int[] orderOfFields = new int[NUMBER_OF_FIELDS_IN_CSV_FILE]; // порядок полей в файле
-
-            // заполним массив порядка полей в файле начальным значением -1 для последующей проверки
-            Arrays.fill(orderOfFields, -1);
-
-            // порядок полей в файле CSV может быть произвольный, но количество полей должно совпадать
-            for (int i = 0; i < split.length; i++) {
-                switch (split[i]) {
-                    case "type" -> orderOfFields[0] = i;
-                    case "id" -> orderOfFields[1] = i;
-                    case "name" -> orderOfFields[2] = i;
-                    case "description" -> orderOfFields[3] = i;
-                    case "status" -> orderOfFields[4] = i;
-                    case "epic" -> orderOfFields[5] = i;
-                    default -> throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле!");
-                }
-            }
-
-            // порядок следования каждого поля в файле должен быть установлен, иначе ошибка формата
-            for (int orderOfField : orderOfFields) {
-                if (orderOfField == -1) {
-                    throw new ManagerSaveException("Поврежден заголовка файла CSV: не хватает полей!");
-                }
-            }
+            FileCsvUtils.checkHeader(fileReader); // проверяем заголовок файла
 
             // читаем построчно файл, разбираем строки и создаем задачи
             while (fileReader.ready()) {
-                String[] splitLine = fileReader.readLine().split(CSV_SEPARATOR);
-
-                // проверяем id задачи на корректность
-                int id;
-                try {
-                    id = Integer.parseInt(splitLine[orderOfFields[1]]);
-                    if (id <= 0) {
-                        throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
-                                ": ID задачи должен быть больше нуля!");
-                    }
-                } catch (NumberFormatException e) {
-                    throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
-                            ": ID задачи должен быть числом!");
-                }
-
-                // проверяем поле статуса на корректность
-                Status status;
-                switch (splitLine[orderOfFields[4]]) {
-                    case "NEW" -> status = Status.NEW;
-                    case "IN_PROGRESS" -> status = Status.IN_PROGRESS;
-                    case "DONE" -> status = Status.DONE;
-                    default -> throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
-                            ": не корректно указан статус задачи!");
-                }
-
-                switch (splitLine[orderOfFields[0]]) {
-                    case "TASK" -> {
-                        Task task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
-                        fileBackedTaskManager.tasks.put(id, task);
-                    }
-                    case "EPIC" -> {
-                        Epic epic = new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
-                        fileBackedTaskManager.epics.put(id, epic);
-                    }
-                    case "SUBTASK" -> {
-                        // проверяем id эпика на корректность
-                        int epicId;
-                        try {
-                            epicId = Integer.parseInt(splitLine[orderOfFields[5]]);
-                            if (epicId <= 0) {
-                                throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
-                                        ": ID эпика подзадачи должен быть больше нуля!");
-                            }
-                        } catch (NumberFormatException e) {
-                            throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
-                                    ": ID эпика подзадачи должен быть числом!");
-                        }
-
-                        Subtask subtask = new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId);
-                        fileBackedTaskManager.subtasks.put(id, subtask);
-                    }
-                    default -> throw new ManagerSaveException("Строка " + fileReader.getLineNumber() +
-                            ": не корректно указан тип задачи!");
-                }
+                Task task = FileCsvUtils.fromString(fileReader.readLine());
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла!");
