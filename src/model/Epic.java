@@ -54,6 +54,11 @@ public class Epic extends Task {
         subTasksId.addAll(epic.getSubtasksId());
     }
 
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
+
     /**
      * Получение списка всех ID подзадач Эпика
      *

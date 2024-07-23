@@ -33,7 +33,8 @@ public class FileCsvUtils {
                 case "description" -> orderOfFields[3] = i;
                 case "status" -> orderOfFields[4] = i;
                 case "epic" -> orderOfFields[5] = i;
-                default -> throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле!");
+                default -> throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле '" +
+                        split[i] + "'!");
             }
         }
 
@@ -52,7 +53,7 @@ public class FileCsvUtils {
         Status status = Status.valueOf(splitLine[orderOfFields[4]]);
         Task task;
 
-        switch (TaskTypes.valueOf(splitLine[orderOfFields[0]])) {
+        switch (TaskType.valueOf(splitLine[orderOfFields[0]])) {
             case TASK -> {
                 task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
             }

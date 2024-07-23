@@ -77,6 +77,11 @@ public class Subtask extends Task {
         super.setId(subtask.getId());
     }
 
+    @Override
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
+
     /**
      * Получение ID эпика
      *
