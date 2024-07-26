@@ -333,6 +333,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Сеттер для переменной taskId
+     *
      * @param id - новое ID
      */
     protected void setTaskId(int id) {
