@@ -3,6 +3,7 @@ package service;
 import model.Epic;
 import model.Subtask;
 import model.Task;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,9 +41,8 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void compareTwoFileBackedManagers() throws IOException {
+    void compareTwoFileBackedManagersAndCheckId() {
         // создадим 1-й файловый менеджер и заполним его задачами
-        File tmpFile = File.createTempFile("tasks", null);
         FileBackedTaskManager taskManager1 = new FileBackedTaskManager(tmpFile.toString());
         Task task;
         Epic epic;
@@ -71,6 +72,10 @@ class FileBackedTaskManagerTest {
                 "Эпики менеджеров не равны!");
         assertArrayEquals(taskManager1.getSubtasks().toArray(), taskManager2.getSubtasks().toArray(),
                 "Подзадачи менеджеров не равны!");
+
+        // в новом менеджере должен быть актуальный ID задач
+        assertEquals(6, taskManager2.getTaskId(), "В созданном из файла менеджере " +
+                "не актуализировался ID задач");
     }
 
     // эмуляция неправильных заголовков файла CSV и его полей
@@ -82,6 +87,8 @@ class FileBackedTaskManagerTest {
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
         assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: Поврежден заголовок файла CSV: " +
                 "неизвестное поле");
+        file.close();
+        Files.delete(tmpFile.toPath());
 
         // пропущено поле в заголовке файла CSV
         tmpFile = File.createTempFile("tasks", null);
@@ -92,6 +99,8 @@ class FileBackedTaskManagerTest {
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
         assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: Поврежден заголовок файла CSV: " +
                 "неизвестное поле!");
+        file.close();
+        Files.delete(tmpFile.toPath());
 
         // не все поля в заголовке файла CSV
         tmpFile = File.createTempFile("tasks", null);
@@ -101,6 +110,8 @@ class FileBackedTaskManagerTest {
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
         assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: не хватает полей!");
+        file.close();
+        Files.delete(tmpFile.toPath());
 
         // дублируются поля в заголовке
         // не должно быть исключения
@@ -109,6 +120,8 @@ class FileBackedTaskManagerTest {
         file.write("type,type,id,name,description,status,epic\n");
         file.close();
         assertDoesNotThrow(() -> FileBackedTaskManager.loadFromFile(tmpFile.toString()), "Исключения быть не должно!");
+        file.close();
+        Files.delete(tmpFile.toPath());
 
         // не корректно указываем ID задачи
         tmpFile = File.createTempFile("tasks", null);
@@ -118,6 +131,8 @@ class FileBackedTaskManagerTest {
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
         assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть числом!");
+        file.close();
+        Files.delete(tmpFile.toPath());
 
         // указываем ID задачи меньше нуля
         tmpFile = File.createTempFile("tasks", null);
@@ -127,6 +142,8 @@ class FileBackedTaskManagerTest {
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
         assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть больше нуля!");
+        file.close();
+        Files.delete(tmpFile.toPath());
 
         // указываем ID задачи = 0
         tmpFile = File.createTempFile("tasks", null);
@@ -136,5 +153,11 @@ class FileBackedTaskManagerTest {
         file.close();
         thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
         assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть больше нуля!");
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        file.close();
+        Files.delete(tmpFile.toPath());
     }
 }
