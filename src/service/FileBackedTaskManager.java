@@ -89,19 +89,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             FileCsvUtils.checkHeader(fileReader); // проверяем заголовок файла
 
             // читаем построчно файл, разбираем строки и создаем задачи прямо в HashMap
+            int id = Integer.MIN_VALUE;
             while (fileReader.ready()) {
                 Task task = FileCsvUtils.fromString(fileReader.readLine());
-
+                int taskId = task.getId();
                 switch (task.getType()) {
-                    case TASK -> fileBackedTaskManager.tasks.put(task.getId(), task);
-                    case EPIC -> fileBackedTaskManager.epics.put(task.getId(), (Epic) task);
+                    case TASK -> fileBackedTaskManager.tasks.put(taskId, task);
+                    case EPIC -> fileBackedTaskManager.epics.put(taskId, (Epic) task);
                     case SUBTASK -> {
                         Subtask subtask = (Subtask) task;
-                        fileBackedTaskManager.subtasks.put(subtask.getId(), subtask);
+                        fileBackedTaskManager.subtasks.put(taskId, subtask);
                         Epic epic = fileBackedTaskManager.epics.get(subtask.getEpicId());
-                        epic.addSubtaskId(subtask.getId()); // в эпике нужно добавить подзадачу
+                        epic.addSubtaskId(taskId); // в эпике нужно добавить подзадачу
                     }
                 }
+                // обновим счетчик ID в менеджере до актуального значения
+                id = Math.max(id, taskId);
+                fileBackedTaskManager.setTaskId(id);
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла!");
