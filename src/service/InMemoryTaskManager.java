@@ -325,6 +325,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Геттер для переменной taskId
+     */
+    protected int getTaskId() {
+        return taskId;
+    }
+
+    /**
      * Сеттер для переменной taskId
      * @param id - новое ID
      */
