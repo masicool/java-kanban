@@ -330,7 +330,7 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @return ID задачи
      */
-    public int getNextId() {
+    private int getNextId() {
         while (tasks.containsKey(taskId + 1) || epics.containsKey(taskId + 1)
                 || subtasks.containsKey(taskId + 1)) {
             taskId++;
