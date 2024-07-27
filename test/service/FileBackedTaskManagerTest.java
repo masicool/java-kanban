@@ -74,7 +74,7 @@ class FileBackedTaskManagerTest {
                 "Подзадачи менеджеров не равны!");
 
         // в новом менеджере должен быть актуальный ID задач
-        assertEquals(6, taskManager2.getTaskId(), "В созданном из файла менеджере " +
+        assertEquals(6, taskManager2.taskId, "В созданном из файла менеджере " +
                 "не актуализировался ID задач");
     }
 

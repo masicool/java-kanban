@@ -105,7 +105,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 // обновим счетчик ID в менеджере до актуального значения
                 id = Math.max(id, taskId);
-                fileBackedTaskManager.setTaskId(id);
+                fileBackedTaskManager.taskId = id;
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла!");
