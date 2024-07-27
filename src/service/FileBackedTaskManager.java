@@ -84,12 +84,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static FileBackedTaskManager loadFromFile(String fileName) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
 
+        int maxTaskId = 0;
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
 
             FileCsvUtils.checkHeader(fileReader); // проверяем заголовок файла
 
             // читаем построчно файл, разбираем строки и создаем задачи прямо в HashMap
-            int id = Integer.MIN_VALUE;
             while (fileReader.ready()) {
                 Task task = FileCsvUtils.fromString(fileReader.readLine());
                 int taskId = task.getId();
@@ -104,13 +104,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     }
                 }
                 // обновим счетчик ID в менеджере до актуального значения
-                id = Math.max(id, taskId);
-                fileBackedTaskManager.taskId = id;
+                maxTaskId = Math.max(maxTaskId, taskId);
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла!");
         }
 
+        fileBackedTaskManager.taskId = maxTaskId;
         return fileBackedTaskManager;
     }
 
