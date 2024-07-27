@@ -12,7 +12,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epics; // список эпиков
     protected final HashMap<Integer, Subtask> subtasks; // список подзадач
     private final HistoryManager historyManager; // объект класса для работы с историей просмотров
-    private int taskId; // уникальный идентификатор задачи
+    protected int taskId; // уникальный идентификатор задачи
 
     public InMemoryTaskManager() {
         taskId = 0;
