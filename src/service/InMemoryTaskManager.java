@@ -8,11 +8,11 @@ import model.Task;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    private int taskId; // уникальный идентификатор задачи
-    private final HashMap<Integer, Task> tasks; // список обычных задач
-    private final HashMap<Integer, Epic> epics; // список эпиков
-    private final HashMap<Integer, Subtask> subtasks; // список подзадач
+    protected final HashMap<Integer, Task> tasks; // список обычных задач
+    protected final HashMap<Integer, Epic> epics; // список эпиков
+    protected final HashMap<Integer, Subtask> subtasks; // список подзадач
     private final HistoryManager historyManager; // объект класса для работы с историей просмотров
+    protected int taskId; // уникальный идентификатор задачи
 
     public InMemoryTaskManager() {
         taskId = 0;
@@ -32,9 +32,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return;
         }
-        if (!setId(task)) {
-            return;
-        }
+        setId(task);
         tasks.put(task.getId(), task);
     }
 
@@ -48,9 +46,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return;
         }
-        if (!setId(epic)) {
-            return;
-        }
+        setId(epic);
         epics.put(epic.getId(), epic);
     }
 
@@ -64,9 +60,7 @@ public class InMemoryTaskManager implements TaskManager {
         if ((subtask == null) || (!epics.containsKey(subtask.getEpicId()))) {
             return;
         }
-        if (!setId(subtask)) {
-            return;
-        }
+        setId(subtask);
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtaskId(subtask.getId());
@@ -331,11 +325,33 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Генерация нового идентификатора задачи
+     * с проверкой id по всем спискам
+     *
+     * @return ID задачи
+     */
+    private int getNextId() {
+        while (tasks.containsKey(taskId + 1) || epics.containsKey(taskId + 1)
+                || subtasks.containsKey(taskId + 1)) {
+            taskId++;
+        }
+        return ++taskId;
+    }
+
+    // Генерация нового идентификатора задачи
+    // с учетом того, что у задачи уже может быть задан ID
+    private void setId(Task task) {
+        // если у задачи задан ID, то используем этот ID при добавлении в список
+        if (task.getId() != 0) return;
+        task.setId(getNextId());
+    }
+
+    /**
      * Обновление статуса эпика
      *
      * @param epic эпика
      */
-    public void updateEpicStatus(Epic epic) {
+    private void updateEpicStatus(Epic epic) {
         if (!epics.containsKey(epic.getId())) {
             return;
         }
@@ -363,31 +379,5 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
-    }
-
-    /**
-     * Генерация нового идентификатора задачи
-     * с проверкой id по всем спискам
-     *
-     * @return ID задачи
-     */
-    public int getNextId() {
-        while (tasks.containsKey(taskId + 1) || epics.containsKey(taskId + 1)
-                || subtasks.containsKey(taskId + 1)) {
-            taskId++;
-        }
-        return ++taskId;
-    }
-
-    // Генерация нового идентификатора задачи
-    // с учетом того, что у задачи уже может быть задан ID
-    private boolean setId(Task task) {
-        // если у задачи задан ID, то используем этот ID при добавлении в список
-        if (task.getId() == 0) {
-            task.setId(getNextId());
-            return true;
-        }
-        // возврат false, если уже есть такой ID
-        return !tasks.containsKey(task.getId());
     }
 }

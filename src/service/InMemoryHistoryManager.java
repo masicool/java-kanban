@@ -9,19 +9,9 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    static class Node {
-        public Task task;
-        public Node next;
-        public Node prev;
-
-        public Node(Task task) {
-            this.task = task;
-        }
-    }
-
+    private final Map<Integer, Node> historyEntries;
     private Node headHistoryNode; // указатель на начало списка истории просмотров
     private Node tailHistoryNode; // указатель на конец списка истории просмотров
-    private final Map<Integer, Node> historyEntries;
 
     public InMemoryHistoryManager() {
         historyEntries = new HashMap<>();
@@ -100,6 +90,16 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
         if (node == tailHistoryNode) {
             tailHistoryNode = prev;
+        }
+    }
+
+    static class Node {
+        public Task task;
+        public Node next;
+        public Node prev;
+
+        public Node(Task task) {
+            this.task = task;
         }
     }
 }

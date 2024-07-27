@@ -33,6 +33,19 @@ public class Task {
     }
 
     /**
+     * Конструктор объекта с установкой всех полей
+     *
+     * @param id          id задачи
+     * @param name        наименование задачи
+     * @param description описание задачи
+     * @param status      статус задачи
+     */
+    public Task(int id, String name, String description, Status status) {
+        this(name, description, status);
+        this.id = id;
+    }
+
+    /**
      * Конструктор для глубокого копирования объекта
      *
      * @param task объект
@@ -78,6 +91,15 @@ public class Task {
     }
 
     /**
+     * Получение типа задачи
+     *
+     * @return типа задачи
+     */
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
+    /**
      * Переопределенный метод сравнения двух объектов
      * считаются равными если у них одинаковые наименования и описания, id задачи не учитывается
      *
@@ -104,21 +126,21 @@ public class Task {
     }
 
     /**
-     * Установка ID задачи
-     *
-     * @param id ID задачи
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /**
      * Получение ID задачи
      *
      * @return ID задачи
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Установка ID задачи
+     *
+     * @param id ID задачи
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
@@ -133,5 +155,13 @@ public class Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status + "}";
+    }
+
+    public String toCsvString() {
+        return "TASK," +
+                getId() + "," +
+                getName() + "," +
+                getDescription() + "," +
+                getStatus() + ",\n";
     }
 }

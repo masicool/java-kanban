@@ -30,6 +30,19 @@ public class Epic extends Task {
     }
 
     /**
+     * Конструктор объекта
+     *
+     * @param id          id задачи
+     * @param name        название задачи
+     * @param description описания
+     * @param status      описания
+     */
+    public Epic(int id, String name, String description, Status status) {
+        super(id, name, description, status);
+        subTasksId = new HashSet<>();
+    }
+
+    /**
      * Конструктор для глубокого копирования объекта
      *
      * @param epic объект
@@ -39,6 +52,11 @@ public class Epic extends Task {
         super.setId(epic.getId());
         subTasksId = new HashSet<>();
         subTasksId.addAll(epic.getSubtasksId());
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
     }
 
     /**
@@ -94,5 +112,14 @@ public class Epic extends Task {
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
                 ", subTasksId=" + Arrays.toString(subTasksId.toArray()) + "}";
+    }
+
+    @Override
+    public String toCsvString() {
+        return "EPIC," +
+                getId() + "," +
+                getName() + "," +
+                getDescription() + "," +
+                getStatus() + ",\n";
     }
 }
