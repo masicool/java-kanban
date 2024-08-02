@@ -9,8 +9,8 @@ public class Task {
     private String name; // название задачи
     private String description; // описание задачи
     private Status status; // статус задачи
-    private Duration duration; // продолжительность задачи в минутах
     private LocalDateTime startTime; // дата и время начала выполнения задачи
+    private Duration duration; // продолжительность задачи в минутах
 
     /**
      * Конструктор объекта
@@ -58,6 +58,8 @@ public class Task {
         this(task.getName(), task.getDescription());
         this.status = task.getStatus();
         this.id = task.getId();
+        this.duration = task.duration;
+        this.startTime = task.startTime;
     }
 
     public String getName() {
@@ -167,5 +169,30 @@ public class Task {
                 getName() + "," +
                 getDescription() + "," +
                 getStatus() + ",\n";
+    }
+
+    /**
+     * Расчет даты и времени завершения задачи
+     *
+     * @return дата и время завершения
+     */
+    public LocalDateTime getEndTime() {
+        return startTime.plusMinutes(duration.toMinutes());
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
     }
 }

@@ -150,33 +150,33 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Обновление обычной задачи
      *
-     * @param newTask новая задача с верным идентификатором
+     * @param task новая задача с верным идентификатором
      */
     @Override
-    public void updateTask(Task newTask) {
-        super.updateTask(newTask);
+    public void updateTask(Task task) {
+        super.updateTask(task);
         save();
     }
 
     /**
      * Обновление эпика
      *
-     * @param newEpic новая задача с верным идентификатором
+     * @param epic новая задача с верным идентификатором
      */
     @Override
-    public void updateEpic(Epic newEpic) {
-        super.updateEpic(newEpic);
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
         save();
     }
 
     /**
      * Обновление подзадачи
      *
-     * @param newSubtask подзадача
+     * @param subtask подзадача
      */
     @Override
-    public void updateSubtask(Subtask newSubtask) {
-        super.updateSubtask(newSubtask);
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
         save();
     }
 
