@@ -1,10 +1,12 @@
 package model;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 
 public class Epic extends Task {
     private final HashSet<Integer> subTasksId; // список из ID подзадач Эпика
+    private LocalDateTime endTime; // продолжительность выполнения эпика
 
     /**
      * Конструктор объекта

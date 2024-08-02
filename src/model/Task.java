@@ -1,5 +1,7 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -7,6 +9,8 @@ public class Task {
     private String name; // название задачи
     private String description; // описание задачи
     private Status status; // статус задачи
+    private Duration duration; // продолжительность задачи в минутах
+    private LocalDateTime startTime; // дата и время начала выполнения задачи
 
     /**
      * Конструктор объекта
