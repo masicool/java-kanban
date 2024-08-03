@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -141,6 +142,17 @@ public class Epic extends Task {
 
     @Override
     public String toCsvString() {
-        return "EPIC," + getId() + "," + getName() + "," + getDescription() + "," + getStatus() + ",\n";
+        String startTime = getStartTime() != null ? "" + getStartTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+        String duration = getDuration() != null ? "" + getDuration().toMinutes() : "";
+        String endTime = getEndTime() != null ? "" + getEndTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+
+        return "EPIC," +
+                getId() + "," +
+                getName() + "," +
+                getDescription() + "," +
+                getStatus() + "," + "," +
+                startTime + "," +
+                duration + "," +
+                endTime + "\n";
     }
 }

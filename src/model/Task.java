@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 public class Task {
@@ -196,11 +197,16 @@ public class Task {
     }
 
     public String toCsvString() {
+        String startTime = getStartTime() != null ? "" + getStartTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+        String duration = getDuration() != null ? "" + getDuration().toMinutes() : "";
+
         return "TASK," +
                 getId() + "," +
                 getName() + "," +
                 getDescription() + "," +
-                getStatus() + ",\n";
+                getStatus() + "," + "," +
+                startTime + "," +
+                duration + ",\n";
     }
 
     /**

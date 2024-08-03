@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class Subtask extends Task {
     private int epicId;
@@ -141,11 +142,16 @@ public class Subtask extends Task {
 
     @Override
     public String toCsvString() {
+        String startTime = getStartTime() != null ? "" + getStartTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+        String duration = getDuration() != null ? "" + getDuration().toMinutes() : "";
+
         return "SUBTASK," +
                 getId() + "," +
                 getName() + "," +
                 getDescription() + "," +
                 getStatus() + "," +
-                epicId + "\n";
+                epicId + "," +
+                startTime + "," +
+                duration + ",\n";
     }
 }
