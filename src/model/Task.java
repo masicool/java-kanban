@@ -37,7 +37,23 @@ public class Task {
     }
 
     /**
-     * Конструктор объекта с установкой всех полей
+     * Конструктор объекта с установкой статуса, времени начала и продолжительности задачи
+     *
+     * @param name        наименование задачи
+     * @param description описание задачи
+     * @param status      статус задачи
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     */
+    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
+        this(name, description);
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    /**
+     * Конструктор объекта с установкой id
      *
      * @param id          id задачи
      * @param name        наименование задачи
@@ -47,6 +63,22 @@ public class Task {
     public Task(int id, String name, String description, Status status) {
         this(name, description, status);
         this.id = id;
+    }
+
+    /**
+     * Конструктор объекта с установкой всех полей
+     *
+     * @param id          id задачи
+     * @param name        наименование задачи
+     * @param description описание задачи
+     * @param status      статус задачи
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     */
+    public Task(int id, String name, String description, Status status, LocalDateTime startTime, Duration duration) {
+        this(id, name, description, status);
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     /**

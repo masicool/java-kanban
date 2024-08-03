@@ -1,5 +1,6 @@
 package model;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,6 +43,23 @@ public class Epic extends Task {
     public Epic(int id, String name, String description, Status status) {
         super(id, name, description, status);
         subTasksId = new HashSet<>();
+    }
+
+    /**
+     * Конструктор объекта
+     *
+     * @param id          id задачи
+     * @param name        название задачи
+     * @param description описания
+     * @param status      описания
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     * @param endTime     время окончания задачи
+     */
+    public Epic(int id, String name, String description, Status status, LocalDateTime startTime, Duration duration, LocalDateTime endTime) {
+        super(id, name, description, status, startTime, duration);
+        subTasksId = new HashSet<>();
+        this.endTime = endTime;
     }
 
     /**

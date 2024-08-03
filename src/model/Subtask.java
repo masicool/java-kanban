@@ -1,5 +1,8 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
     private int epicId;
 
@@ -63,6 +66,23 @@ public class Subtask extends Task {
      */
     public Subtask(int id, String name, String description, Status status, int epicId) {
         super(id, name, description, status);
+        this.epicId = epicId;
+    }
+
+    /**
+     * Конструктор объекта с установкой всех полей
+     *
+     * @param id          id подзадачи
+     * @param name        имя подзадачи
+     * @param description описание подзадачи
+     * @param status      статус подзадачи
+     * @param epicId      id Эпика
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     */
+    public Subtask(int id, String name, String description, Status status, int epicId, LocalDateTime startTime,
+                   Duration duration) {
+        super(id, name, description, status, startTime, duration);
         this.epicId = epicId;
     }
 

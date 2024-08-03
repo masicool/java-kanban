@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class FileCsvUtils {
-    private static final int NUMBER_OF_FIELDS_IN_CSV_FILE = 6; // максимальное кол-во полей в файле CSV
+    private static final int NUMBER_OF_FIELDS_IN_CSV_FILE = 9; // максимальное кол-во полей в файле CSV
     private static final String CSV_SEPARATOR = ","; // разделитель между полями файла CSV
     private static final int[] orderOfFields = new int[NUMBER_OF_FIELDS_IN_CSV_FILE]; // порядок полей в файле
 
@@ -40,6 +40,9 @@ public class FileCsvUtils {
                 case "description" -> orderOfFields[3] = i;
                 case "status" -> orderOfFields[4] = i;
                 case "epic" -> orderOfFields[5] = i;
+                case "starttime" -> orderOfFields[6] = i;
+                case "duration" -> orderOfFields[7] = i;
+                case "endtime" -> orderOfFields[8] = i;
                 default ->
                         throw new ManagerSaveException("Поврежден заголовок файла CSV: неизвестное поле '" + split[i] + "'!");
             }
