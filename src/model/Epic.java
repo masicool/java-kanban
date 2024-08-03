@@ -54,11 +54,21 @@ public class Epic extends Task {
         super.setId(epic.getId());
         subTasksId = new HashSet<>();
         subTasksId.addAll(epic.getSubtasksId());
+        endTime = epic.endTime;
     }
 
     @Override
     public TaskType getType() {
         return TaskType.EPIC;
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     /**
@@ -108,20 +118,11 @@ public class Epic extends Task {
      */
     @Override
     public String toString() {
-        return "Epic{" +
-                "id=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", status=" + getStatus() +
-                ", subTasksId=" + Arrays.toString(subTasksId.toArray()) + "}";
+        return "Epic{" + "id=" + getId() + ", name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", status=" + getStatus() + ", subTasksId=" + Arrays.toString(subTasksId.toArray()) + "}";
     }
 
     @Override
     public String toCsvString() {
-        return "EPIC," +
-                getId() + "," +
-                getName() + "," +
-                getDescription() + "," +
-                getStatus() + ",\n";
+        return "EPIC," + getId() + "," + getName() + "," + getDescription() + "," + getStatus() + ",\n";
     }
 }
