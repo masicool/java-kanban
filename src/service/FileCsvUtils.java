@@ -4,6 +4,10 @@ import model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 
 public class FileCsvUtils {
@@ -63,17 +67,26 @@ public class FileCsvUtils {
      * @return новый объект - задача
      */
     public static Task fromString(String value) {
-        String[] splitLine = value.split(CSV_SEPARATOR);
+        String[] splitLine = value.split(CSV_SEPARATOR, NUMBER_OF_FIELDS_IN_CSV_FILE);
         int id = parseIdFromString(splitLine[orderOfFields[1]]);
         Status status = Status.valueOf(splitLine[orderOfFields[4]]);
+        LocalDateTime startTime = parseDateTimeFromString(splitLine[orderOfFields[6]]);
+        Duration duration = parseDurationFromString(splitLine[orderOfFields[7]]);
+        LocalDateTime endTime;
         Task task;
 
         switch (TaskType.valueOf(splitLine[orderOfFields[0]])) {
-            case TASK -> task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
-            case EPIC -> task = new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status);
+            case TASK -> task = new Task(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status,
+                    startTime, duration);
+            case EPIC -> {
+                endTime = parseDateTimeFromString(splitLine[orderOfFields[8]]);
+                task = new Epic(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, startTime,
+                        duration, endTime);
+            }
             case SUBTASK -> {
                 int epicId = parseIdFromString(splitLine[orderOfFields[5]]);
-                task = new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId);
+                task = new Subtask(id, splitLine[orderOfFields[2]], splitLine[orderOfFields[3]], status, epicId,
+                        startTime, duration);
             }
             default -> throw new ManagerSaveException("Не корректный тип задачи: " + splitLine[orderOfFields[0]] + "!");
         }
@@ -92,5 +105,41 @@ public class FileCsvUtils {
             throw new ManagerSaveException("ID задачи должен быть числом, а не '" + strId + "'!");
         }
         return id;
+    }
+
+    // парсинг строки со значением времени и возврат LocalDateTime
+    private static LocalDateTime parseDateTimeFromString(String strId) {
+        if (strId.isBlank()) return null;
+
+        long utcTime;
+
+        try {
+            utcTime = Long.parseLong(strId);
+            if (utcTime <= 0) {
+                throw new ManagerSaveException("Время задачи должен быть больше нуля, а не '" + strId +
+                        "'!");
+            }
+        } catch (NumberFormatException e) {
+            throw new ManagerSaveException("Время задачи должен быть числом, а не '" + strId + "'!");
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(utcTime), ZoneOffset.UTC);
+    }
+
+    // парсинг строки со значением времени в минутах и возврат Duration
+    private static Duration parseDurationFromString(String strId) {
+        if (strId.isBlank()) return null;
+
+        long minutes;
+
+        try {
+            minutes = Long.parseLong(strId);
+            if (minutes <= 0) {
+                throw new ManagerSaveException("Продолжительность задачи должен быть больше нуля, а не '" + strId +
+                        "'!");
+            }
+        } catch (NumberFormatException e) {
+            throw new ManagerSaveException("Продолжительность задачи должен быть числом, а не '" + strId + "'!");
+        }
+        return Duration.ofMinutes(minutes);
     }
 }

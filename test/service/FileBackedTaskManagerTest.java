@@ -93,23 +93,24 @@ class FileBackedTaskManagerTest {
         // пропущено поле в заголовке файла CSV
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,,description,status,epic\n");
+        file.write("type,id,,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: Поврежден заголовок файла CSV: " +
-                "неизвестное поле!");
+        thrown = assertThrows(ManagerSaveException.class,
+                () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
+                "Должно быть исключение с текстом: Поврежден заголовок файла CSV: неизвестное поле!");
         file.close();
         Files.delete(tmpFile.toPath());
 
         // не все поля в заголовке файла CSV
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,description,status,epic\n");
+        file.write("type,id,,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: не хватает полей!");
+        thrown = assertThrows(ManagerSaveException.class,
+                () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
+                "Должно быть исключение с текстом: не хватает полей!");
         file.close();
         Files.delete(tmpFile.toPath());
 
@@ -117,7 +118,7 @@ class FileBackedTaskManagerTest {
         // не должно быть исключения
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,type,id,name,description,status,epic\n");
+        file.write("type,type,id,name,description,status,epic,starttime,duration,endtime\n");
         file.close();
         assertDoesNotThrow(() -> FileBackedTaskManager.loadFromFile(tmpFile.toString()), "Исключения быть не должно!");
         file.close();
@@ -126,33 +127,36 @@ class FileBackedTaskManagerTest {
         // не корректно указываем ID задачи
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,description,status,epic\n");
+        file.write("type,id,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,один,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть числом!");
+        thrown = assertThrows(ManagerSaveException.class,
+                () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
+                "Должно быть исключение: ID задачи должен быть числом!");
         file.close();
         Files.delete(tmpFile.toPath());
 
         // указываем ID задачи меньше нуля
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,description,status,epic\n");
+        file.write("type,id,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,-100,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть больше нуля!");
+        thrown = assertThrows(ManagerSaveException.class,
+                () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
+                "Должно быть исключение: ID задачи должен быть больше нуля!");
         file.close();
         Files.delete(tmpFile.toPath());
 
         // указываем ID задачи = 0
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
-        file.write("type,id,description,status,epic\n");
+        file.write("type,id,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,0,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение: ID задачи должен быть больше нуля!");
+        thrown = assertThrows(ManagerSaveException.class,
+                () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
+                "Должно быть исключение: ID задачи должен быть больше нуля!");
     }
 
     @AfterEach
