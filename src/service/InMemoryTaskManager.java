@@ -107,12 +107,13 @@ public class InMemoryTaskManager implements TaskManager {
         Epic oldEpic = epics.get(epic.getId());
         HashSet<Integer> oldSubtasksId = oldEpic.getSubtasksId();
         HashSet<Integer> newSubtasksId = epic.getSubtasksId();
-        for (Integer oldSubtaskId : oldSubtasksId) {
-            if (!newSubtasksId.contains(oldSubtaskId)) {
-                sortedTasks.remove(subtasks.get(oldSubtaskId));
-                subtasks.remove(oldSubtaskId);
-            }
-        }
+
+        oldSubtasksId.stream().
+                filter(oldSubtaskId -> !newSubtasksId.contains(oldSubtaskId)).
+                forEach(oldSubtaskId -> {
+                    sortedTasks.remove(subtasks.get(oldSubtaskId));
+                    subtasks.remove(oldSubtaskId);
+                });
 
         // обновим статус эпика
         updateEpicStatus(epic);
@@ -219,11 +220,11 @@ public class InMemoryTaskManager implements TaskManager {
         if ((epic == null) || (epic.getSubtasksId().isEmpty())) {
             return null;
         }
-        ArrayList<Subtask> epicSubtasks = new ArrayList<>();
-        for (int subtaskId : epic.getSubtasksId()) {
-            epicSubtasks.add(subtasks.get(subtaskId));
-        }
-        return new ArrayList<>(epicSubtasks);
+        return subtasks.
+                entrySet().
+                stream().
+                filter(entry -> epic.getSubtasksId().contains(entry.getKey())).
+                map(Map.Entry::getValue).toList();
     }
 
     /**
@@ -241,9 +242,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteTasks() {
-        for (int taskId : tasks.keySet()) { // удаление всех задач из истории просмотров
-            historyManager.remove(taskId);
-        }
+        tasks.keySet().forEach(historyManager::remove);
         sortedTasks.removeIf(task -> task.getType() == TaskType.TASK);
         tasks.clear();
     }
@@ -315,23 +314,25 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteSubtasks() {
         // удаление всех подзадач из истории просмотров
-        for (int subtaskId : subtasks.keySet()) {
-            historyManager.remove(subtaskId);
-        }
-
+        subtasks.keySet().forEach(historyManager::remove);
+        // удаление подзадач из сортированного списка
         sortedTasks.removeIf(task -> task.getType() == TaskType.SUBTASK);
         subtasks.clear();
         // обновим статус всех эпиков
-        for (Epic epic : epics.values()) {
-            // при обновлении эпика, обновляется список подзадач эпика (несуществующие удаляются)
+        epics.values().forEach(epic -> {
             updateEpicStatus(epic);
             updateEpicTime(epic);
-        }
+        });
     }
 
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public Set<Task> getPrioritizedTasks() {
+        return sortedTasks;
     }
 
     /**
