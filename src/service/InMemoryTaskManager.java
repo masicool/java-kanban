@@ -108,9 +108,10 @@ public class InMemoryTaskManager implements TaskManager {
         HashSet<Integer> oldSubtasksId = oldEpic.getSubtasksId();
         HashSet<Integer> newSubtasksId = epic.getSubtasksId();
 
-        oldSubtasksId.stream().
-                filter(oldSubtaskId -> !newSubtasksId.contains(oldSubtaskId)).
-                forEach(oldSubtaskId -> {
+        oldSubtasksId
+                .stream()
+                .filter(oldSubtaskId -> !newSubtasksId.contains(oldSubtaskId))
+                .forEach(oldSubtaskId -> {
                     sortedTasks.remove(subtasks.get(oldSubtaskId));
                     subtasks.remove(oldSubtaskId);
                 });
@@ -220,11 +221,12 @@ public class InMemoryTaskManager implements TaskManager {
         if ((epic == null) || (epic.getSubtasksId().isEmpty())) {
             return null;
         }
-        return subtasks.
-                entrySet().
-                stream().
-                filter(entry -> epic.getSubtasksId().contains(entry.getKey())).
-                map(Map.Entry::getValue).toList();
+
+        return subtasks
+                .entrySet()
+                .stream()
+                .filter(entry -> epic.getSubtasksId().contains(entry.getKey()))
+                .map(Map.Entry::getValue).toList();
     }
 
     /**
@@ -412,9 +414,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     private boolean isNotIntersectRanges(Task newTask) {
         if (sortedTasks.isEmpty()) return true;
-        return sortedTasks.stream().
-                filter(task -> task.getId() != newTask.getId()).
-                allMatch(task -> isNotIntersectRangesTwoTasks(task, newTask));
+        return sortedTasks
+                .stream()
+                .filter(task -> task.getId() != newTask.getId())
+                .allMatch(task -> isNotIntersectRangesTwoTasks(task, newTask));
     }
 
     private boolean isNotIntersectRangesTwoTasks(Task task1, Task task2) {
