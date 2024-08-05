@@ -5,7 +5,6 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedWriter;
@@ -13,16 +12,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     File tmpFile;
     BufferedWriter file;
     ManagerSaveException thrown;
 
-    @BeforeEach
-    void beforeEach() throws IOException {
+    FileBackedTaskManagerTest() throws IOException {
+        taskManager = new FileBackedTaskManager("tasks.csv");
         tmpFile = File.createTempFile("tasks", null);
         file = new BufferedWriter(new FileWriter(tmpFile));
     }
@@ -52,6 +53,8 @@ class FileBackedTaskManagerTest {
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
         taskManager1.addTask(task); // id будет = 1
         task = new Task("Сварить борщ", "Найти рецепт борща");
+        task.setStartTime(LocalDateTime.of(2024, 8, 5, 10, 0));
+        task.setDuration(Duration.ofMinutes(13));
         taskManager1.addTask(task); // id будет = 2
         // создадим эпик с тремя подзадачами
         epic = new Epic("Переезд", "Переезд на новую квартиру");
@@ -61,6 +64,8 @@ class FileBackedTaskManagerTest {
         subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
         taskManager1.addSubtask(subtask); // id будет = 5
         subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
+        subtask.setStartTime(LocalDateTime.of(2024, 8, 4, 14, 0));
+        subtask.setDuration(Duration.ofMinutes(55));
         taskManager1.addSubtask(subtask); // id будет = 6
 
         // создадим 2-й файловый менеджер из файла 1-го менеджера

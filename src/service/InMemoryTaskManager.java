@@ -258,11 +258,15 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.remove(id); // удаление эпика из истории просмотров
         Epic epic = epics.get(id);
         // нужно удалить все подзадачи эпика вместе с самим эпиком
+
         for (int subtaskId : epic.getSubtasksId()) {
             historyManager.remove(subtaskId); // удаление подзадач эпика из истории просмотров
-            sortedTasks.remove(subtasks.get(subtaskId));
+            if (subtasks.get(subtaskId).getStartTime() != null) {
+                sortedTasks.remove(subtasks.get(subtaskId));
+            }
             subtasks.remove(subtaskId);
         }
+
         epics.remove(id);
     }
 
@@ -301,7 +305,7 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.remove(id); // удаление подзадачи из истории просмотров
 
         Subtask subtask = subtasks.get(id);
-        sortedTasks.remove(subtask);
+        if (subtask.getStartTime() != null) sortedTasks.remove(subtask);
         Epic epic = epics.get(subtask.getEpicId());
         subtasks.remove(id);
         updateEpicStatus(epic);
@@ -407,7 +411,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private boolean isNotIntersectRanges(Task newTask) {
-        return sortedTasks.stream().allMatch(task -> isNotIntersectRangesTwoTasks(task, newTask));
+        if (sortedTasks.isEmpty()) return true;
+        return sortedTasks.stream().
+                filter(task -> task.getId() != newTask.getId()).
+                allMatch(task -> isNotIntersectRangesTwoTasks(task, newTask));
     }
 
     private boolean isNotIntersectRangesTwoTasks(Task task1, Task task2) {
@@ -424,7 +431,9 @@ public class InMemoryTaskManager implements TaskManager {
             if (subtask.getStartTime() == null) continue;
             if (subtask.getStartTime().isBefore(startTime)) startTime = subtask.getStartTime();
             if (subtask.getEndTime().isAfter(endTime)) endTime = subtask.getEndTime();
-            duration = duration.plus(subtask.getDuration());
+            if (subtask.getDuration() != null) {
+                duration = duration.plus(subtask.getDuration());
+            }
         }
         if (startTime != LocalDateTime.MAX && endTime != LocalDateTime.MIN) {
             epic.setStartTime(startTime);

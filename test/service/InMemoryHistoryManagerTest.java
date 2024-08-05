@@ -37,12 +37,14 @@ class InMemoryHistoryManagerTest {
         savedHistoryViews.add(subtask);
     }
 
+    // получение истории
     @Test
     void getHistory() {
         assertArrayEquals(savedHistoryViews.toArray(), historyManager.getHistory().toArray(), "История просмотров" +
                 " не сохраняется");
     }
 
+    // пустая история задач
     @Test
     void shouldBeNullSizeAfterClear() {
         historyManager.remove(1);
@@ -52,6 +54,7 @@ class InMemoryHistoryManagerTest {
                 "История не удалилась");
     }
 
+    // нет ограничений на размер истории задач
     @Test
     void shouldBeMaxMore10Tasks() {
         historyManager.remove(1);
@@ -65,6 +68,7 @@ class InMemoryHistoryManagerTest {
         assertEquals(42, historyManager.getHistory().size(), "История просмотров не ограниченна по размеру");
     }
 
+    // удаление не существующей задачи
     @Test
     void removeNotExistTask() {
         historyManager.remove(1237812);
@@ -72,6 +76,7 @@ class InMemoryHistoryManagerTest {
                 "При удалении несуществующей задачи - история просмотров изменилась");
     }
 
+    // удаление задачи по ID
     @Test
     void deleteTaskById() {
         int oldSize = historyManager.getHistory().size();
@@ -80,6 +85,7 @@ class InMemoryHistoryManagerTest {
                 "Задача из истории просмотров не удалилась");
     }
 
+    // дублирование
     @Test
     void addExistTaskId() {
         Task task = new Task("Дубликат задачи с ID = 1", "Описание");
@@ -98,6 +104,7 @@ class InMemoryHistoryManagerTest {
                 "Добавилась задача с существующим ID в историю");
     }
 
+    // удаление из истории с начала
     @Test
     void deleteFirstTask() {
         historyManager.remove(1);
@@ -106,6 +113,7 @@ class InMemoryHistoryManagerTest {
                 "Изменился порядок в истории после удалении первой задачи");
     }
 
+    // удаление из истории с середины
     @Test
     void deleteTaskFromMiddle() {
         historyManager.remove(2);
@@ -114,6 +122,7 @@ class InMemoryHistoryManagerTest {
                 "Изменился порядок в истории после удалении задачи из середины");
     }
 
+    // удаление из истории с конца
     @Test
     void deleteLastTask() {
         historyManager.remove(3);

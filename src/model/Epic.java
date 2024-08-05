@@ -137,7 +137,16 @@ public class Epic extends Task {
      */
     @Override
     public String toString() {
-        return "Epic{" + "id=" + getId() + ", name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", status=" + getStatus() + ", subTasksId=" + Arrays.toString(subTasksId.toArray()) + "}";
+        return "Epic{" +
+                "id=" + getId() +
+                ", name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", status=" + getStatus() +
+                ", subTasksId=" + Arrays.toString(subTasksId.toArray()) +
+                ", startTime=" + getStartTime() +
+                ", duration=" + getDuration() +
+                ", endTime=" + getEndTime() +
+                "}";
     }
 
     @Override

@@ -13,19 +13,6 @@ public class Subtask extends Task {
      * @param epicId      Эпик
      * @param name        имя подзадачи
      * @param description описание подзадачи
-     * @param status      статус подзадачи
-     */
-    public Subtask(int epicId, String name, String description, Status status) {
-        super(name, description, status);
-        this.epicId = epicId;
-    }
-
-    /**
-     * Конструктор объекта
-     *
-     * @param epicId      Эпик
-     * @param name        имя подзадачи
-     * @param description описание подзадачи
      */
     public Subtask(int epicId, String name, String description) {
         super(name, description);
@@ -59,15 +46,14 @@ public class Subtask extends Task {
     /**
      * Конструктор объекта
      *
-     * @param id          id подзадачи
+     * @param epic        Эпик
      * @param name        имя подзадачи
      * @param description описание подзадачи
-     * @param status      статус подзадачи
-     * @param epicId      id Эпика
      */
-    public Subtask(int id, String name, String description, Status status, int epicId) {
-        super(id, name, description, status);
-        this.epicId = epicId;
+    public Subtask(Epic epic, String name, String description, Status status, LocalDateTime startTime,
+                   Duration duration) {
+        super(name, description, status, startTime, duration);
+        this.epicId = epic.getId();
     }
 
     /**
@@ -85,17 +71,6 @@ public class Subtask extends Task {
                    Duration duration) {
         super(id, name, description, status, startTime, duration);
         this.epicId = epicId;
-    }
-
-    /**
-     * Конструктор для глубокого копирования объекта
-     *
-     * @param subtask объект
-     */
-    public Subtask(Subtask subtask) {
-        super(subtask.getName(), subtask.getDescription(), subtask.getStatus());
-        this.epicId = subtask.epicId;
-        super.setId(subtask.getId());
     }
 
     @Override
@@ -137,7 +112,10 @@ public class Subtask extends Task {
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
-                ", epicId=" + epicId + "}";
+                ", epicId=" + epicId +
+                ", startTime=" + getStartTime() +
+                ", duration=" + getDuration() +
+                '}';
     }
 
     @Override

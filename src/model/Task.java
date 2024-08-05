@@ -193,7 +193,10 @@ public class Task {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + status + "}";
+                ", status=" + status +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                '}';
     }
 
     public String toCsvString() {
@@ -215,6 +218,9 @@ public class Task {
      * @return дата и время завершения
      */
     public LocalDateTime getEndTime() {
+        if (duration == null) {
+            return startTime;
+        }
         return startTime.plusMinutes(duration.toMinutes());
     }
 

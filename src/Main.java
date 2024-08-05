@@ -4,6 +4,8 @@ import model.Task;
 import service.Managers;
 import service.TaskManager;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 public class Main {
@@ -17,6 +19,8 @@ public class Main {
 
         // создадим две задачи
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
+        task.setStartTime(LocalDateTime.of(2023, 8, 5, 8, 30));
+        task.setDuration(Duration.ofMinutes(30));
         taskManager.addTask(task); // id будет = 1
         task = new Task("Сварить борщ", "Найти рецепт борща");
         taskManager.addTask(task); // id будет = 2
@@ -66,6 +70,7 @@ public class Main {
         printTasks(taskManager.getHistory());
         System.out.println();
         printTasks(taskManager.getHistory());
+
     }
 
     /**

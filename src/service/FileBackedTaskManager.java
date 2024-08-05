@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private String path; // путь и наименование файла для сохранения
@@ -34,6 +36,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
             taskManager.addTask(task); // id будет = 1
             task = new Task("Сварить борщ", "Найти рецепт борща");
+            task.setStartTime(LocalDateTime.of(2024, 8, 5, 10, 0));
+            task.setDuration(Duration.ofMinutes(13));
             taskManager.addTask(task); // id будет = 2
 
             // создадим эпик с тремя подзадачами
@@ -44,6 +48,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
             taskManager.addSubtask(subtask); // id будет = 5
             subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
+            subtask.setStartTime(LocalDateTime.of(2024, 8, 4, 14, 0));
+            subtask.setDuration(Duration.ofMinutes(55));
             taskManager.addSubtask(subtask); // id будет = 6
 
             // создадим эпик без подзадач
@@ -236,7 +242,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         super.deleteSubtasks();
         save();
     }
-
 
     /**
      * Метод сохранения состояния менеджера в файл со всеми задачами
