@@ -249,8 +249,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS);
         subtask2.setStartTime(LocalDateTime.of(2000, 1, 1, 10, 0));
         taskManager.addSubtask(subtask2);
-        assertEquals(subtask2, taskManager.getPrioritizedTasks().toArray()[0]);
-        assertEquals(subtask1, taskManager.getPrioritizedTasks().toArray()[1]);
-        assertEquals(task, taskManager.getPrioritizedTasks().toArray()[2]);
+        assertEquals(subtask2, taskManager.getPrioritizedTasks().getFirst());
+        assertEquals(subtask1, taskManager.getPrioritizedTasks().get(1));
+        assertEquals(task, taskManager.getPrioritizedTasks().get(2));
     }
 }
