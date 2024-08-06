@@ -68,11 +68,11 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         FileBackedTaskManager taskManager2 = FileBackedTaskManager.loadFromFile(tmpFile.toString());
 
         // сравним оба файловых менеджера
-        assertArrayEquals(taskManager1.getTasks().toArray(), taskManager2.getTasks().toArray(),
+        assertEquals(taskManager1.getTasks(), taskManager2.getTasks(),
                 "Задачи менеджеров не равны!");
-        assertArrayEquals(taskManager1.getEpics().toArray(), taskManager2.getEpics().toArray(),
+        assertEquals(taskManager1.getEpics(), taskManager2.getEpics(),
                 "Эпики менеджеров не равны!");
-        assertArrayEquals(taskManager1.getSubtasks().toArray(), taskManager2.getSubtasks().toArray(),
+        assertEquals(taskManager1.getSubtasks(), taskManager2.getSubtasks(),
                 "Подзадачи менеджеров не равны!");
 
         // в новом менеджере должен быть актуальный ID задач
@@ -206,7 +206,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         FileBackedTaskManager taskManager2 = FileBackedTaskManager.loadFromFile(tmpFile.toString());
 
         // сравним два списка сортированных задач
-        assertArrayEquals(taskManager1.getPrioritizedTasks().toArray(), taskManager2.getPrioritizedTasks().toArray(),
+        assertEquals(taskManager1.getPrioritizedTasks(), taskManager2.getPrioritizedTasks(),
                 "Задачи в сортированном списке не равны!");
     }
 }
