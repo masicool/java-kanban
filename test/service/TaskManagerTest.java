@@ -30,6 +30,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addEpic(epic);
         subtask1 = new Subtask(epic, "Грузчики", "Найти грузчиков");
         taskManager.addSubtask(subtask1);
+        subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS);
+        taskManager.addSubtask(subtask1);
     }
 
     @Test
@@ -222,13 +224,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(30));
         taskManager.addSubtask(subtask2);
+        assertTrue(taskManager.getPrioritizedTasks().contains(task) &&
+                        taskManager.getPrioritizedTasks().contains(subtask2),
+                "Не добавился задача в отсортированный список задач!");
     }
 
     // время эпика считается по его подзадачам
     @Test
-    void updateTimeEpic() {
+    void checkTimeEpic() {
         subtask1.setStartTime(LocalDateTime.of(2000, 8, 5, 10, 0));
-        subtask1.setDuration(Duration.ofMinutes(45));
+        subtask1.setDuration(Duration.ofMinutes(30));
         taskManager.updateSubtask(subtask1);
         subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS);
         subtask2.setStartTime(LocalDateTime.of(2024, 8, 7, 10, 0));
@@ -236,7 +241,29 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtask(subtask2);
         assertEquals(LocalDateTime.of(2000, 8, 5, 10, 0), epic.getStartTime());
         assertEquals(LocalDateTime.of(2024, 8, 7, 10, 45), epic.getEndTime());
-        assertEquals(Duration.ofMinutes(90), epic.getDuration());
+        assertEquals(Duration.ofMinutes(75), epic.getDuration());
+
+        // очистим время 2-й.подзадачи, время эпика должно измениться
+        subtask2.setStartTime(null);
+        subtask2.setDuration(null);
+        taskManager.updateSubtask(subtask2);
+        assertEquals(LocalDateTime.of(2000, 8, 5, 10, 0), epic.getStartTime());
+        assertEquals(LocalDateTime.of(2000, 8, 5, 10, 30), epic.getEndTime());
+        assertEquals(Duration.ofMinutes(30), epic.getDuration());
+    }
+
+    // удалим все подзадачи эпика, у которых указано время,, отсортированный список должен быть пуст
+    @Test
+    void checkSortedTasksWhenAllSubtasksIsDeleted() {
+        subtask1.setStartTime(LocalDateTime.of(2000, 8, 5, 10, 0));
+        subtask1.setDuration(Duration.ofMinutes(30));
+        taskManager.updateSubtask(subtask1);
+        subtask2.setStartTime(LocalDateTime.of(2024, 8, 7, 10, 0));
+        subtask2.setDuration(Duration.ofMinutes(45));
+        taskManager.updateSubtask(subtask2);
+        taskManager.deleteSubtaskById(subtask1.getId());
+        taskManager.deleteSubtaskById(subtask2.getId());
+        assertTrue(taskManager.getPrioritizedTasks().isEmpty());
     }
 
     // задачи в отсортированном списке должны быть расположены по возрастанию даты
@@ -252,5 +279,45 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(subtask2, taskManager.getPrioritizedTasks().getFirst());
         assertEquals(subtask1, taskManager.getPrioritizedTasks().get(1));
         assertEquals(task, taskManager.getPrioritizedTasks().get(2));
+    }
+
+    // проверяем как добавляется задача в отсортированный список при разных условиях
+    @Test
+    void updateOneTaskAndCheckInSortedTasks() {
+        // должна добавится одна задача в отсортированный список
+        task.setStartTime(LocalDateTime.of(2000, 1, 5, 0, 0));
+        task.setDuration(Duration.ofMinutes(45));
+        taskManager.updateTask(task);
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
+                taskManager.getPrioritizedTasks().getFirst().equals(task));
+
+        // повторяем добавление, задача не должна добавится дважды
+        taskManager.addTask(task);
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
+                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        taskManager.addTask(task);
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
+                taskManager.getPrioritizedTasks().getFirst().equals(task));
+
+        // обновим эту же задачу с теми же значениями
+        taskManager.updateTask(task);
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
+                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        taskManager.addTask(task);
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
+                taskManager.getPrioritizedTasks().getFirst().equals(task));
+
+        // уберем время у задачи, она должна быть удалена из сортированного списка, список должен быть пуст
+        task.setStartTime(null);
+        taskManager.updateTask(task);
+        assertTrue(taskManager.getPrioritizedTasks().isEmpty());
+
+        subtask1.setStartTime(LocalDateTime.of(2000, 1, 3, 10, 0));
+        subtask1.setDuration(Duration.ofMinutes(45));
+        taskManager.updateSubtask(subtask1);
+        subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS);
+        subtask2.setStartTime(LocalDateTime.of(2000, 1, 1, 10, 0));
+        taskManager.addSubtask(subtask2);
+        assertEquals(subtask2, taskManager.getPrioritizedTasks().getFirst());
     }
 }

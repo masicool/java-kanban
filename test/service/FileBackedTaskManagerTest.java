@@ -53,8 +53,6 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
         taskManager1.addTask(task); // id будет = 1
         task = new Task("Сварить борщ", "Найти рецепт борща");
-        task.setStartTime(LocalDateTime.of(2024, 8, 5, 10, 0));
-        task.setDuration(Duration.ofMinutes(13));
         taskManager1.addTask(task); // id будет = 2
         // создадим эпик с тремя подзадачами
         epic = new Epic("Переезд", "Переезд на новую квартиру");
@@ -64,8 +62,6 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
         taskManager1.addSubtask(subtask); // id будет = 5
         subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
-        subtask.setStartTime(LocalDateTime.of(2024, 8, 4, 14, 0));
-        subtask.setDuration(Duration.ofMinutes(55));
         taskManager1.addSubtask(subtask); // id будет = 6
 
         // создадим 2-й файловый менеджер из файла 1-го менеджера
@@ -82,6 +78,10 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         // в новом менеджере должен быть актуальный ID задач
         assertEquals(6, taskManager2.taskId, "В созданном из файла менеджере " +
                 "не актуализировался ID задач");
+
+        // так как время задач не указано, то отсортированный список должен быть пустой
+        assertTrue(taskManager1.getPrioritizedTasks().isEmpty());
+        assertTrue(taskManager2.getPrioritizedTasks().isEmpty());
     }
 
     // эмуляция неправильных заголовков файла CSV и его полей
@@ -169,5 +169,44 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     void afterEach() throws IOException {
         file.close();
         Files.delete(tmpFile.toPath());
+    }
+
+    // проверим, что из файла подгружаются задачи из сортированного списка
+    @Test
+    void checkSortedTasksWhenLoadFromFile() {
+        // создадим 1-й файловый менеджер и заполним его задачами
+        FileBackedTaskManager taskManager1 = new FileBackedTaskManager(tmpFile.toString());
+        Task task;
+        Epic epic;
+        Subtask subtask;
+        // создадим две задачи
+        task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
+        task.setStartTime(LocalDateTime.of(2000, 1, 5, 0, 0));
+        task.setDuration(Duration.ofMinutes(13));
+        taskManager1.addTask(task); // id будет = 1
+        task = new Task("Сварить борщ", "Найти рецепт борща");
+        task.setStartTime(LocalDateTime.of(2024, 8, 5, 10, 0));
+        task.setDuration(Duration.ofMinutes(50));
+        taskManager1.addTask(task); // id будет = 2
+        // создадим эпик с тремя подзадачами
+        epic = new Epic("Переезд", "Переезд на новую квартиру");
+        taskManager1.addEpic(epic); // id будет = 3
+        subtask = new Subtask(epic, "Грузчики", "Найти грузчиков");
+        subtask.setStartTime(LocalDateTime.of(2234, 1, 3, 10, 0));
+        subtask.setDuration(Duration.ofMinutes(47));
+        taskManager1.addSubtask(subtask); // id будет = 4
+        subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
+        subtask.setStartTime(LocalDateTime.of(1977, 1, 3, 10, 0));
+        subtask.setDuration(Duration.ofMinutes(27));
+        taskManager1.addSubtask(subtask); // id будет = 5
+        subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
+        taskManager1.addSubtask(subtask); // id будет = 6
+
+        // создадим 2-й файловый менеджер из файла 1-го менеджера
+        FileBackedTaskManager taskManager2 = FileBackedTaskManager.loadFromFile(tmpFile.toString());
+
+        // сравним два списка сортированных задач
+        assertArrayEquals(taskManager1.getPrioritizedTasks().toArray(), taskManager2.getPrioritizedTasks().toArray(),
+                "Задачи в сортированном списке не равны!");
     }
 }
