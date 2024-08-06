@@ -11,9 +11,9 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasks; // список обычных задач
     protected final HashMap<Integer, Epic> epics; // список эпиков
     protected final HashMap<Integer, Subtask> subtasks; // список подзадач
-    private final HistoryManager historyManager; // объект класса для работы с историей просмотров
-    private final Set<Task> sortedTasks; // для хранения зада в отсортированном виде по времени начала в
+    protected final Set<Task> sortedTasks; // для хранения зада в отсортированном виде по времени начала в
     protected int taskId; // уникальный идентификатор задачи
+    private final HistoryManager historyManager; // объект класса для работы с историей просмотров
 
     public InMemoryTaskManager() {
         taskId = 0;

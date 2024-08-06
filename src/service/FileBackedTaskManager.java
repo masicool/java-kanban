@@ -101,13 +101,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = FileCsvUtils.fromString(fileReader.readLine());
                 int taskId = task.getId();
                 switch (task.getType()) {
-                    case TASK -> fileBackedTaskManager.tasks.put(taskId, task);
+                    case TASK -> {
+                        fileBackedTaskManager.tasks.put(taskId, task);
+                        // добавим задачу в сортированный список, если указан время начала
+                        if (task.getStartTime() != null) fileBackedTaskManager.sortedTasks.add(task);
+                    }
                     case EPIC -> fileBackedTaskManager.epics.put(taskId, (Epic) task);
                     case SUBTASK -> {
                         Subtask subtask = (Subtask) task;
                         fileBackedTaskManager.subtasks.put(taskId, subtask);
                         Epic epic = fileBackedTaskManager.epics.get(subtask.getEpicId());
                         epic.addSubtaskId(taskId); // в эпике нужно добавить подзадачу
+                        // добавим задачу в сортированный список, если указан время начала
+                        if (subtask.getStartTime() != null) fileBackedTaskManager.sortedTasks.add(subtask);
                     }
                 }
                 // обновим счетчик ID в менеджере до актуального значения
