@@ -1,5 +1,6 @@
 package service;
 
+import exception.ManagerSaveException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -9,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private String path; // путь и наименование файла для сохранения
@@ -33,6 +36,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
             taskManager.addTask(task); // id будет = 1
             task = new Task("Сварить борщ", "Найти рецепт борща");
+            task.setStartTime(LocalDateTime.of(2024, 8, 5, 10, 0));
+            task.setDuration(Duration.ofMinutes(13));
             taskManager.addTask(task); // id будет = 2
 
             // создадим эпик с тремя подзадачами
@@ -43,6 +48,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             subtask = new Subtask(epic, "Кот", "Поймать кота и упаковать");
             taskManager.addSubtask(subtask); // id будет = 5
             subtask = new Subtask(epic, "Мебель", "Запаковать мебель");
+            subtask.setStartTime(LocalDateTime.of(2024, 8, 4, 14, 0));
+            subtask.setDuration(Duration.ofMinutes(55));
             taskManager.addSubtask(subtask); // id будет = 6
 
             // создадим эпик без подзадач
@@ -94,13 +101,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = FileCsvUtils.fromString(fileReader.readLine());
                 int taskId = task.getId();
                 switch (task.getType()) {
-                    case TASK -> fileBackedTaskManager.tasks.put(taskId, task);
+                    case TASK -> {
+                        fileBackedTaskManager.tasks.put(taskId, task);
+                        // добавим задачу в сортированный список, если указан время начала
+                        if (task.getStartTime() != null) fileBackedTaskManager.sortedTasks.add(task);
+                    }
                     case EPIC -> fileBackedTaskManager.epics.put(taskId, (Epic) task);
                     case SUBTASK -> {
                         Subtask subtask = (Subtask) task;
                         fileBackedTaskManager.subtasks.put(taskId, subtask);
                         Epic epic = fileBackedTaskManager.epics.get(subtask.getEpicId());
                         epic.addSubtaskId(taskId); // в эпике нужно добавить подзадачу
+                        // добавим задачу в сортированный список, если указан время начала
+                        if (subtask.getStartTime() != null) fileBackedTaskManager.sortedTasks.add(subtask);
                     }
                 }
                 // обновим счетчик ID в менеджере до актуального значения
@@ -150,33 +163,33 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Обновление обычной задачи
      *
-     * @param newTask новая задача с верным идентификатором
+     * @param task новая задача с верным идентификатором
      */
     @Override
-    public void updateTask(Task newTask) {
-        super.updateTask(newTask);
+    public void updateTask(Task task) {
+        super.updateTask(task);
         save();
     }
 
     /**
      * Обновление эпика
      *
-     * @param newEpic новая задача с верным идентификатором
+     * @param epic новая задача с верным идентификатором
      */
     @Override
-    public void updateEpic(Epic newEpic) {
-        super.updateEpic(newEpic);
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
         save();
     }
 
     /**
      * Обновление подзадачи
      *
-     * @param newSubtask подзадача
+     * @param subtask подзадача
      */
     @Override
-    public void updateSubtask(Subtask newSubtask) {
-        super.updateSubtask(newSubtask);
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
         save();
     }
 
@@ -241,7 +254,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      */
     private void save() {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8))) {
-            fileWriter.write("type,id,name,description,status,epic\n");
+            fileWriter.write("type,id,name,description,status,epic,starttime,duration,endtime\n");
             for (Task task : getTasks()) {
                 fileWriter.write(task.toCsvString());
             }

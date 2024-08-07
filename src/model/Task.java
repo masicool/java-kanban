@@ -1,5 +1,8 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 public class Task {
@@ -7,6 +10,8 @@ public class Task {
     private String name; // название задачи
     private String description; // описание задачи
     private Status status; // статус задачи
+    private LocalDateTime startTime; // дата и время начала выполнения задачи
+    private Duration duration; // продолжительность задачи в минутах
 
     /**
      * Конструктор объекта
@@ -33,7 +38,23 @@ public class Task {
     }
 
     /**
-     * Конструктор объекта с установкой всех полей
+     * Конструктор объекта с установкой статуса, времени начала и продолжительности задачи
+     *
+     * @param name        наименование задачи
+     * @param description описание задачи
+     * @param status      статус задачи
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     */
+    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
+        this(name, description);
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    /**
+     * Конструктор объекта с установкой id
      *
      * @param id          id задачи
      * @param name        наименование задачи
@@ -46,6 +67,22 @@ public class Task {
     }
 
     /**
+     * Конструктор объекта с установкой всех полей
+     *
+     * @param id          id задачи
+     * @param name        наименование задачи
+     * @param description описание задачи
+     * @param status      статус задачи
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     */
+    public Task(int id, String name, String description, Status status, LocalDateTime startTime, Duration duration) {
+        this(id, name, description, status);
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    /**
      * Конструктор для глубокого копирования объекта
      *
      * @param task объект
@@ -54,6 +91,8 @@ public class Task {
         this(task.getName(), task.getDescription());
         this.status = task.getStatus();
         this.id = task.getId();
+        this.duration = task.duration;
+        this.startTime = task.startTime;
     }
 
     public String getName() {
@@ -122,7 +161,7 @@ public class Task {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description);
+        return Objects.hash(id);
     }
 
     /**
@@ -154,14 +193,50 @@ public class Task {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + status + "}";
+                ", status=" + status +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                '}';
     }
 
     public String toCsvString() {
+        String startTime = getStartTime() != null ? "" + getStartTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+        String duration = getDuration() != null ? "" + getDuration().toMinutes() : "";
+
         return "TASK," +
                 getId() + "," +
                 getName() + "," +
                 getDescription() + "," +
-                getStatus() + ",\n";
+                getStatus() + "," + "," +
+                startTime + "," +
+                duration + ",\n";
+    }
+
+    /**
+     * Расчет даты и времени завершения задачи
+     *
+     * @return дата и время завершения
+     */
+    public LocalDateTime getEndTime() {
+        if (duration == null) {
+            return startTime;
+        }
+        return startTime.plusMinutes(duration.toMinutes());
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
     }
 }

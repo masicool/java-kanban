@@ -1,20 +1,11 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 public class Subtask extends Task {
     private int epicId;
-
-    /**
-     * Конструктор объекта
-     *
-     * @param epicId      Эпик
-     * @param name        имя подзадачи
-     * @param description описание подзадачи
-     * @param status      статус подзадачи
-     */
-    public Subtask(int epicId, String name, String description, Status status) {
-        super(name, description, status);
-        this.epicId = epicId;
-    }
 
     /**
      * Конструктор объекта
@@ -55,26 +46,31 @@ public class Subtask extends Task {
     /**
      * Конструктор объекта
      *
+     * @param epic        Эпик
+     * @param name        имя подзадачи
+     * @param description описание подзадачи
+     */
+    public Subtask(Epic epic, String name, String description, Status status, LocalDateTime startTime,
+                   Duration duration) {
+        super(name, description, status, startTime, duration);
+        this.epicId = epic.getId();
+    }
+
+    /**
+     * Конструктор объекта с установкой всех полей
+     *
      * @param id          id подзадачи
      * @param name        имя подзадачи
      * @param description описание подзадачи
      * @param status      статус подзадачи
      * @param epicId      id Эпика
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
      */
-    public Subtask(int id, String name, String description, Status status, int epicId) {
-        super(id, name, description, status);
+    public Subtask(int id, String name, String description, Status status, int epicId, LocalDateTime startTime,
+                   Duration duration) {
+        super(id, name, description, status, startTime, duration);
         this.epicId = epicId;
-    }
-
-    /**
-     * Конструктор для глубокого копирования объекта
-     *
-     * @param subtask объект
-     */
-    public Subtask(Subtask subtask) {
-        super(subtask.getName(), subtask.getDescription(), subtask.getStatus());
-        this.epicId = subtask.epicId;
-        super.setId(subtask.getId());
     }
 
     @Override
@@ -116,16 +112,24 @@ public class Subtask extends Task {
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
-                ", epicId=" + epicId + "}";
+                ", epicId=" + epicId +
+                ", startTime=" + getStartTime() +
+                ", duration=" + getDuration() +
+                '}';
     }
 
     @Override
     public String toCsvString() {
+        String startTime = getStartTime() != null ? "" + getStartTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+        String duration = getDuration() != null ? "" + getDuration().toMinutes() : "";
+
         return "SUBTASK," +
                 getId() + "," +
                 getName() + "," +
                 getDescription() + "," +
                 getStatus() + "," +
-                epicId + "\n";
+                epicId + "," +
+                startTime + "," +
+                duration + ",\n";
     }
 }

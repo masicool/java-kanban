@@ -1,10 +1,14 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.HashSet;
 
 public class Epic extends Task {
     private final HashSet<Integer> subTasksId; // список из ID подзадач Эпика
+    private LocalDateTime endTime; // продолжительность выполнения эпика
 
     /**
      * Конструктор объекта
@@ -43,6 +47,23 @@ public class Epic extends Task {
     }
 
     /**
+     * Конструктор объекта
+     *
+     * @param id          id задачи
+     * @param name        название задачи
+     * @param description описания
+     * @param status      описания
+     * @param startTime   время начала задачи
+     * @param duration    продолжительность задачи
+     * @param endTime     время окончания задачи
+     */
+    public Epic(int id, String name, String description, Status status, LocalDateTime startTime, Duration duration, LocalDateTime endTime) {
+        super(id, name, description, status, startTime, duration);
+        subTasksId = new HashSet<>();
+        this.endTime = endTime;
+    }
+
+    /**
      * Конструктор для глубокого копирования объекта
      *
      * @param epic объект
@@ -52,11 +73,21 @@ public class Epic extends Task {
         super.setId(epic.getId());
         subTasksId = new HashSet<>();
         subTasksId.addAll(epic.getSubtasksId());
+        endTime = epic.endTime;
     }
 
     @Override
     public TaskType getType() {
         return TaskType.EPIC;
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     /**
@@ -111,15 +142,26 @@ public class Epic extends Task {
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
-                ", subTasksId=" + Arrays.toString(subTasksId.toArray()) + "}";
+                ", subTasksId=" + Arrays.toString(subTasksId.toArray()) +
+                ", startTime=" + getStartTime() +
+                ", duration=" + getDuration() +
+                ", endTime=" + getEndTime() +
+                "}";
     }
 
     @Override
     public String toCsvString() {
+        String startTime = getStartTime() != null ? "" + getStartTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+        String duration = getDuration() != null ? "" + getDuration().toMinutes() : "";
+        String endTime = getEndTime() != null ? "" + getEndTime().toInstant(ZoneOffset.UTC).toEpochMilli() : "";
+
         return "EPIC," +
                 getId() + "," +
                 getName() + "," +
                 getDescription() + "," +
-                getStatus() + ",\n";
+                getStatus() + "," + "," +
+                startTime + "," +
+                duration + "," +
+                endTime + "\n";
     }
 }
