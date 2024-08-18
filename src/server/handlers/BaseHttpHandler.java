@@ -3,6 +3,7 @@ package server.handlers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
+import server.ContentTypes;
 import server.EndpointGroups;
 import server.Endpoints;
 import server.adapters.DurationAdapter;
@@ -10,12 +11,14 @@ import server.adapters.LocalDateTimeAdapter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class BaseHttpHandler {
     protected Gson gson;
+    private final Charset CHAR_SET = StandardCharsets.UTF_8;
 
     public BaseHttpHandler() {
         gson = new GsonBuilder()
@@ -25,14 +28,16 @@ public class BaseHttpHandler {
                 .registerTypeAdapter(Duration.class, new DurationAdapter()).create();
     }
 
-    protected void sendText(HttpExchange exchange, String text, int rCode) throws IOException {
-        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-
-        exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-
+    protected void sendData(HttpExchange exchange, String text, int rCode, ContentTypes contentType) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", contentType.getValue() + ";charset=" + CHAR_SET.name());
+        String respStr = text;
+        if (contentType == ContentTypes.HTML) {
+            respStr = "<h1>" + rCode + " " + text + "</h1";
+        }
+        byte[] response = respStr.getBytes(CHAR_SET);
         try (OutputStream os = exchange.getResponseBody()) {
-            exchange.sendResponseHeaders(rCode, resp.length);
-            os.write(resp);
+            exchange.sendResponseHeaders(rCode, response.length);
+            os.write(response);
         }
         exchange.close();
     }
@@ -45,6 +50,7 @@ public class BaseHttpHandler {
     protected Endpoints getEndpoint(String[] pathParts, String requestMethod, EndpointGroups group) {
         switch (group) {
             case TASKS -> {
+                if (!pathParts[1].equals("tasks")) return Endpoints.UNKNOWN; // доп. проверка на путь
                 switch (requestMethod) {
                     case "GET" -> {
                         if (pathParts.length == 2) return Endpoints.GET_TASKS;
@@ -59,6 +65,7 @@ public class BaseHttpHandler {
                 }
             }
             case SUBTASKS -> {
+                if (!pathParts[1].equals("subtasks")) return Endpoints.UNKNOWN; // доп. проверка на путь
                 switch (requestMethod) {
                     case "GET" -> {
                         if (pathParts.length == 2) return Endpoints.GET_SUBTASKS;
@@ -73,6 +80,7 @@ public class BaseHttpHandler {
                 }
             }
             case EPICS -> {
+                if (!pathParts[1].equals("epics")) return Endpoints.UNKNOWN; // доп. проверка на путь
                 switch (requestMethod) {
                     case "GET" -> {
                         if (pathParts.length == 2) return Endpoints.GET_EPICS;
@@ -89,9 +97,11 @@ public class BaseHttpHandler {
                 }
             }
             case HISTORY -> {
+                if (!pathParts[1].equals("history")) return Endpoints.UNKNOWN; // доп. проверка на путь
                 if (requestMethod.equals("GET") && pathParts.length == 2) return Endpoints.GET_HISTORY;
             }
             case PRIORITIZED -> {
+                if (!pathParts[1].equals("prioritized")) return Endpoints.UNKNOWN; // доп. проверка на путь
                 if (requestMethod.equals("GET") && pathParts.length == 2) return Endpoints.GET_PRIORITIZED_TASKS;
             }
         }
