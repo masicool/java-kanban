@@ -405,7 +405,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (isNotIntersectRanges(task)) {
                 sortedTasks.add(task);
             } else {
-                throw new TaskValidateException("Пересекается время с уже существующей задачей!");
+                throw new TaskValidateException("Time is crossing with an existing task!");
             }
         } else { // если дата начала не указана, то задачу нужно удалить из сортированного списка, если она там есть
             sortedTasks.removeIf(oldTask -> oldTask.getId() == task.getId());

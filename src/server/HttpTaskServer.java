@@ -4,6 +4,8 @@ import com.sun.net.httpserver.HttpServer;
 import model.Epic;
 import model.Subtask;
 import model.Task;
+import server.handlers.EpicsHandler;
+import server.handlers.SubtasksHandler;
 import server.handlers.TasksHandler;
 import service.InMemoryTaskManager;
 import service.Managers;
@@ -23,8 +25,8 @@ public class HttpTaskServer {
         this.manager = manager;
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TasksHandler(manager));
-        //httpServer.createContext("/subtasks", new SubtaskHandler(taskManager));
-        //httpServer.createContext("/epics", new EpicsHandler(taskManager));
+        server.createContext("/subtasks", new SubtasksHandler(manager));
+        server.createContext("/epics", new EpicsHandler(manager));
         //httpServer.createContext("/history", new HistoryHandler(taskManager));
         //httpServer.createContext("/prioritized", new prioritizedHandler(taskManager));
     }

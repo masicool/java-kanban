@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 public class BaseHttpHandler {
     protected Gson gson;
-    private final Charset CHAR_SET = StandardCharsets.UTF_8;
+    protected final Charset CHAR_SET = StandardCharsets.UTF_8;
 
     public BaseHttpHandler() {
         gson = new GsonBuilder()
