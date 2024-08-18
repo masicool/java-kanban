@@ -22,7 +22,6 @@ public class BaseHttpHandler {
 
     public BaseHttpHandler() {
         gson = new GsonBuilder()
-                //.serializeNulls() //TODO подумать, убрать или оставить
                 .setPrettyPrinting()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter()).create();

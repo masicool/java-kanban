@@ -7,14 +7,12 @@ import exception.ManagerSaveException;
 import exception.NotFoundException;
 import exception.TaskValidateException;
 import model.Subtask;
-import model.Task;
 import server.ContentTypes;
 import server.EndpointGroups;
 import server.Endpoints;
 import service.TaskManager;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager taskManager;
@@ -45,12 +43,9 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                 tmpSubtaskId = Integer.parseInt(pathParts[2]);
             }
             switch (endpoint) {
-                case GET_SUBTASKS -> {
-                    sendData(exchange, gson.toJson(taskManager.getSubtasks()), 200, ContentTypes.JSON);
-                }
-                case GET_SUBTASK_BY_ID -> {
-                    sendData(exchange, gson.toJson(taskManager.getSubtaskById(tmpSubtaskId)), 200, ContentTypes.JSON);
-                }
+                case GET_SUBTASKS -> sendData(exchange, gson.toJson(taskManager.getSubtasks()), 200, ContentTypes.JSON);
+                case GET_SUBTASK_BY_ID ->
+                        sendData(exchange, gson.toJson(taskManager.getSubtaskById(tmpSubtaskId)), 200, ContentTypes.JSON);
                 case POST_SUBTASK -> {
                     Subtask subtask = gson.fromJson(requestBody, Subtask.class);
                     tmpSubtaskId = subtask.getId();

@@ -1,11 +1,11 @@
 package server;
 
 public enum ContentTypes {
-    JSON ("application/json"),
-    PLAIN ("text/plain"),
-    HTML ("text?html");
+    JSON("application/json"),
+    HTML("text?html");
 
     private final String contentType;
+
     ContentTypes(String contentType) {
         this.contentType = contentType;
     }

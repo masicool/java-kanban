@@ -15,7 +15,6 @@ import service.TaskManager;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager taskManager;
@@ -46,12 +45,9 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                 tmpEpicId = Integer.parseInt(pathParts[2]);
             }
             switch (endpoint) {
-                case GET_EPICS -> {
-                    sendData(exchange, gson.toJson(taskManager.getEpics()), 200, ContentTypes.JSON);
-                }
-                case GET_EPIC_BY_ID -> {
-                    sendData(exchange, gson.toJson(taskManager.getEpicById(tmpEpicId)), 200, ContentTypes.JSON);
-                }
+                case GET_EPICS -> sendData(exchange, gson.toJson(taskManager.getEpics()), 200, ContentTypes.JSON);
+                case GET_EPIC_BY_ID ->
+                        sendData(exchange, gson.toJson(taskManager.getEpicById(tmpEpicId)), 200, ContentTypes.JSON);
                 case GET_EPIC_SUBTASKS -> {
                     Epic epic = taskManager.getEpicById(tmpEpicId);
                     List<Subtask> subtasks = taskManager.getEpicSubtasks(epic);
@@ -60,12 +56,17 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                 case POST_EPIC -> {
                     Epic epic = gson.fromJson(requestBody, Epic.class);
                     tmpEpicId = epic.getId();
+                    boolean isEpicExist = true;
                     try {
                         taskManager.getEpicById(tmpEpicId);
+                    } catch (NotFoundException e) {
+                        isEpicExist = false;
+                    }
+                    if (isEpicExist) {
                         taskManager.updateEpic(epic);
                         sendData(exchange, "The epic with ID=" + tmpEpicId + " has been updated.", 201,
                                 ContentTypes.HTML);
-                    } catch (NotFoundException e) {
+                    } else {
                         taskManager.addEpic(epic);
                         sendData(exchange, "The epic was created with ID=" + epic.getId(), 201,
                                 ContentTypes.HTML);
