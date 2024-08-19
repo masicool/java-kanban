@@ -154,7 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Collection<Task> getTasks() {
+    public List<Task> getTasks() {
         return new ArrayList<>(tasks.values());
     }
 
@@ -178,7 +178,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Collection<Epic> getEpics() {
+    public List<Epic> getEpics() {
         return new ArrayList<>(epics.values());
     }
 
@@ -201,7 +201,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Collection<Subtask> getSubtasks() {
+    public List<Subtask> getSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
 

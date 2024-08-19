@@ -64,11 +64,11 @@ public class HttpTaskServer {
         //httpServer.stop(1);
     }
 
-    private void stop() {
+    public void stop() {
         server.stop(1);
     }
 
-    private void start() {
+    public void start() {
         server.start();
     }
 }

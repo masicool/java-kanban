@@ -4,7 +4,6 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface TaskManager {
@@ -20,15 +19,15 @@ public interface TaskManager {
 
     void updateSubtask(Subtask newSubtask);
 
-    Collection<Task> getTasks();
+    List<Task> getTasks();
 
     Task getTaskById(int taskId);
 
-    Collection<Epic> getEpics();
+    List<Epic> getEpics();
 
     Epic getEpicById(int epicId);
 
-    Collection<Subtask> getSubtasks();
+    List<Subtask> getSubtasks();
 
     Subtask getSubtaskById(int subtaskId);
 
