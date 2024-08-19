@@ -37,19 +37,15 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         Endpoints endpoint = getEndpoint(pathParts, exchange.getRequestMethod(), EndpointGroups.TASKS);
         try {
             if (endpoint == Endpoints.UNKNOWN) throw new NotFoundException("Not Found");
-            String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
             int tmpTaskId = -1;
             if (pathParts.length > 2) {
                 tmpTaskId = Integer.parseInt(pathParts[2]);
             }
             switch (endpoint) {
-                case GET_TASKS -> {
-                    sendData(exchange, gson.toJson(taskManager.getTasks()), 200, ContentTypes.JSON);
-                }
-                case GET_TASK_BY_ID -> {
-                    sendData(exchange, gson.toJson(taskManager.getTaskById(tmpTaskId)), 200, ContentTypes.JSON);
-                }
+                case GET_TASKS -> sendData(exchange, gson.toJson(taskManager.getTasks()), 200, ContentTypes.JSON);
+                case GET_TASK_BY_ID -> sendData(exchange, gson.toJson(taskManager.getTaskById(tmpTaskId)), 200, ContentTypes.JSON);
                 case POST_TASK -> {
+                    String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
                     Task task = gson.fromJson(requestBody, Task.class);
                     tmpTaskId = task.getId();
                     try {

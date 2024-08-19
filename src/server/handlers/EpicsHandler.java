@@ -39,7 +39,6 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         Endpoints endpoint = getEndpoint(pathParts, exchange.getRequestMethod(), EndpointGroups.EPICS);
         try {
             if (endpoint == Endpoints.UNKNOWN) throw new NotFoundException("Not Found");
-            String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
             int tmpEpicId = -1;
             if (pathParts.length > 2) {
                 tmpEpicId = Integer.parseInt(pathParts[2]);
@@ -54,6 +53,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                     sendData(exchange, gson.toJson(subtasks), 200, ContentTypes.JSON);
                 }
                 case POST_EPIC -> {
+                    String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
                     Epic epic = gson.fromJson(requestBody, Epic.class);
                     tmpEpicId = epic.getId();
                     boolean isEpicExist = true;

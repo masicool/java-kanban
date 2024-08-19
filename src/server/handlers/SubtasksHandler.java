@@ -37,7 +37,6 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         Endpoints endpoint = getEndpoint(pathParts, exchange.getRequestMethod(), EndpointGroups.SUBTASKS);
         try {
             if (endpoint == Endpoints.UNKNOWN) throw new NotFoundException("Not Found");
-            String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
             int tmpSubtaskId = -1;
             if (pathParts.length > 2) {
                 tmpSubtaskId = Integer.parseInt(pathParts[2]);
@@ -47,6 +46,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                 case GET_SUBTASK_BY_ID ->
                         sendData(exchange, gson.toJson(taskManager.getSubtaskById(tmpSubtaskId)), 200, ContentTypes.JSON);
                 case POST_SUBTASK -> {
+                    String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
                     Subtask subtask = gson.fromJson(requestBody, Subtask.class);
                     tmpSubtaskId = subtask.getId();
                     try {

@@ -17,8 +17,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class BaseHttpHandler {
-    protected Gson gson;
     protected final Charset CHAR_SET = StandardCharsets.UTF_8;
+    protected Gson gson;
 
     public BaseHttpHandler() {
         gson = new GsonBuilder()
@@ -27,6 +27,15 @@ public class BaseHttpHandler {
                 .registerTypeAdapter(Duration.class, new DurationAdapter()).create();
     }
 
+    /**
+     * Отправка ответа сервера
+     *
+     * @param exchange    - объект класса HttpExchange для обмена данными
+     * @param text        - текстовая часть ответа сервера
+     * @param rCode       - код ответа сервера
+     * @param contentType - тип контента для указания его в заголовках ответа
+     * @throws IOException - возможное исключение
+     */
     protected void sendData(HttpExchange exchange, String text, int rCode, ContentTypes contentType) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", contentType.getValue() + ";charset=" + CHAR_SET.name());
         String respStr = text;
@@ -41,11 +50,25 @@ public class BaseHttpHandler {
         exchange.close();
     }
 
+    /**
+     * Разделение пути запроса на отдельные строки
+     *
+     * @param exchange - контейнер обмена
+     * @return - массив строк
+     */
     protected String[] getSplitPath(HttpExchange exchange) {
         String requestPath = exchange.getRequestURI().getPath();
         return requestPath.split("/");
     }
 
+    /**
+     * Получение конечного эндпоинта из пути запроса
+     *
+     * @param pathParts     - путь запроса, разбитый на отдельные подстроки
+     * @param requestMethod - тип запроса
+     * @param group         - тип эндпоинта для поиска
+     * @return - эндпоинт
+     */
     protected Endpoints getEndpoint(String[] pathParts, String requestMethod, EndpointGroups group) {
         switch (group) {
             case TASKS -> {

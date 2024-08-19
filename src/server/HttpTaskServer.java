@@ -4,9 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import server.handlers.EpicsHandler;
-import server.handlers.SubtasksHandler;
-import server.handlers.TasksHandler;
+import server.handlers.*;
 import service.Managers;
 import service.TaskManager;
 
@@ -26,8 +24,8 @@ public class HttpTaskServer {
         server.createContext("/tasks", new TasksHandler(manager));
         server.createContext("/subtasks", new SubtasksHandler(manager));
         server.createContext("/epics", new EpicsHandler(manager));
-        //httpServer.createContext("/history", new HistoryHandler(taskManager));
-        //httpServer.createContext("/prioritized", new prioritizedHandler(taskManager));
+        server.createContext("/history", new HistoryHandler(manager));
+        server.createContext("/prioritized", new PrioritizedHandler(manager));
     }
 
     public static void main(String[] args) throws IOException {
