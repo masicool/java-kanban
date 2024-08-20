@@ -17,7 +17,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class BaseHttpHandler {
-    protected final Charset CHAR_SET = StandardCharsets.UTF_8;
+    protected static final Charset CHAR_SET = StandardCharsets.UTF_8;
     protected Gson gson;
 
     public BaseHttpHandler() {

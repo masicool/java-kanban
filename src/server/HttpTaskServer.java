@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class HttpTaskServer {
-    public final int PORT = 8080;
+    public static final int PORT = 8080;
     private final HttpServer server;
     private final TaskManager manager;
 
@@ -60,7 +60,7 @@ public class HttpTaskServer {
         httpServer.manager.addEpic(epic); // id будет = 7
 
         httpServer.start();
-        System.out.println("HTTP-сервер запущен на " + httpServer.PORT + " порту!");
+        System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
     }
 
     public void stop() {
