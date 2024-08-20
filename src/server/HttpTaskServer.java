@@ -61,11 +61,10 @@ public class HttpTaskServer {
 
         httpServer.start();
         System.out.println("HTTP-сервер запущен на " + httpServer.PORT + " порту!");
-        //httpServer.stop(1);
     }
 
     public void stop() {
-        server.stop(1);
+        server.stop(0);
     }
 
     public void start() {

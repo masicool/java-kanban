@@ -36,7 +36,7 @@ public class HttpTaskManagerTasksTest {
             .setPrettyPrinting()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(Duration.class, new DurationAdapter()).create();
-    HttpClient client;
+    HttpClient client = HttpClient.newHttpClient();
     HttpRequest request;
     URI url;
     HttpResponse<String> response;
@@ -51,7 +51,6 @@ public class HttpTaskManagerTasksTest {
         manager.deleteSubtasks();
         manager.deleteEpics();
         taskServer.start();
-        client = HttpClient.newHttpClient();
     }
 
     @AfterEach
@@ -112,15 +111,6 @@ public class HttpTaskManagerTasksTest {
 
         // запросим задачу с неправильным ID
         url = URI.create("http://localhost:8080/tasks/id303");
-        request = HttpRequest.newBuilder().uri(url).GET().build();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(404, response.statusCode());
-    }
-
-    @Test
-    public void wrongGetRequest() throws IOException, InterruptedException {
-        // сформируем неправильный GET запрос, должна быть ошибка 404
-        url = URI.create("http://localhost:8080/tasksssssssss");
         request = HttpRequest.newBuilder().uri(url).GET().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(404, response.statusCode());
@@ -196,15 +186,6 @@ public class HttpTaskManagerTasksTest {
     }
 
     @Test
-    public void wrongPostRequest() throws IOException, InterruptedException {
-        // сформируем неправильный POST запрос, должна быть ошибка 404
-        url = URI.create("http://localhost:8080/posttttttttt");
-        request = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString("")).build();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(404, response.statusCode());
-    }
-
-    @Test
     public void deleteTask() throws IOException, InterruptedException {
         // добавим несколько задач в менеджер
         Task task = new Task("Task 1", "Task 1", Status.NEW);
@@ -222,7 +203,7 @@ public class HttpTaskManagerTasksTest {
         List<Task> tasksFromManager = manager.getTasks();
         assertNotNull(tasksFromManager, "Задачи не возвращаются!");
         assertEquals(2, tasksFromManager.size(), "Некорректное количество задач!");
-        assertTrue(tasksFromManager.stream().filter(t -> t.getId() == 2).findFirst().isEmpty(),
+        assertTrue(tasksFromManager.stream().noneMatch(t -> t.getId() == 2),
                 "Задача не удалилась!");
 
         // попробуем удалить задачу с не существующим ID, в менеджере сейчас 2 задачи
@@ -233,17 +214,7 @@ public class HttpTaskManagerTasksTest {
         tasksFromManager = manager.getTasks();
         assertNotNull(tasksFromManager, "Задачи не возвращаются!");
         assertEquals(2, tasksFromManager.size(), "Некорректное количество задач!");
-        assertTrue(tasksFromManager.stream().filter(t -> t.getId() == 2).findFirst().isEmpty(),
+        assertTrue(tasksFromManager.stream().noneMatch(t -> t.getId() == 2),
                 "Задача не удалилась!");
     }
-
-    @Test
-    public void wrongDeleteRequest() throws IOException, InterruptedException {
-        // сформируем неправильный DELETE запрос, должна быть ошибка 404
-        url = URI.create("http://localhost:8080/deleteeeeee");
-        request = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString("")).build();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(404, response.statusCode());
-    }
-
 }

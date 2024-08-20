@@ -50,7 +50,7 @@ public class Main {
         taskManager.getEpicById(3);
         printTasks(taskManager.getHistory());
         System.out.println();
-        taskManager.getEpicById(2);
+        taskManager.getEpicById(7);
         printTasks(taskManager.getHistory());
         System.out.println();
         taskManager.getSubtaskById(6);
