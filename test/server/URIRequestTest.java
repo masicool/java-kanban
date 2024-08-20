@@ -123,4 +123,22 @@ public class URIRequestTest {
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(404, response.statusCode());
     }
+
+    @Test
+    public void wrongGetRequestHistory() throws IOException, InterruptedException {
+        // сформируем неправильный DELETE запрос, должна быть ошибка 404
+        url = URI.create("http://localhost:8080/historyyyyyy");
+        request = HttpRequest.newBuilder().uri(url).GET().build();
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(404, response.statusCode());
+    }
+
+    @Test
+    public void wrongGetRequestPrioritized() throws IOException, InterruptedException {
+        // сформируем неправильный DELETE запрос, должна быть ошибка 404
+        url = URI.create("http://localhost:8080/prioritizeddddd");
+        request = HttpRequest.newBuilder().uri(url).GET().build();
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(404, response.statusCode());
+    }
 }
