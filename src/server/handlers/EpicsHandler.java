@@ -2,7 +2,6 @@ package server.handlers;
 
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import exception.ManagerSaveException;
 import exception.NotFoundException;
 import exception.TaskValidateException;
@@ -16,7 +15,7 @@ import service.TaskManager;
 import java.io.IOException;
 import java.util.List;
 
-public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+public class EpicsHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
 
     public EpicsHandler(TaskManager taskManager) {

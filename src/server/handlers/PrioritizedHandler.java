@@ -1,7 +1,6 @@
 package server.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import exception.NotFoundException;
 import server.ContentTypes;
 import server.EndpointGroups;
@@ -10,7 +9,7 @@ import service.TaskManager;
 
 import java.io.IOException;
 
-public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
+public class PrioritizedHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
 
     public PrioritizedHandler(TaskManager taskManager) {

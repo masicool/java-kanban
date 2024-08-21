@@ -3,6 +3,7 @@ package server.handlers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import server.ContentTypes;
 import server.EndpointGroups;
 import server.Endpoints;
@@ -16,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class BaseHttpHandler {
+public abstract class BaseHttpHandler implements HttpHandler {
     protected static final Charset CHAR_SET = StandardCharsets.UTF_8;
     protected Gson gson;
 

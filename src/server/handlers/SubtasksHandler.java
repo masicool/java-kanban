@@ -2,7 +2,6 @@ package server.handlers;
 
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import exception.ManagerSaveException;
 import exception.NotFoundException;
 import exception.TaskValidateException;
@@ -14,7 +13,7 @@ import service.TaskManager;
 
 import java.io.IOException;
 
-public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
+public class SubtasksHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
 
     public SubtasksHandler(TaskManager taskManager) {
