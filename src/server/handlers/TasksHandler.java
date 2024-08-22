@@ -6,7 +6,6 @@ import exception.ManagerSaveException;
 import exception.NotFoundException;
 import exception.TaskValidateException;
 import model.Task;
-import server.ContentTypes;
 import server.EndpointGroups;
 import server.Endpoints;
 import service.TaskManager;
@@ -41,9 +40,8 @@ public class TasksHandler extends BaseHttpHandler {
                 tmpTaskId = Integer.parseInt(pathParts[2]);
             }
             switch (endpoint) {
-                case GET_TASKS -> sendData(exchange, gson.toJson(taskManager.getTasks()), 200, ContentTypes.JSON);
-                case GET_TASK_BY_ID ->
-                        sendData(exchange, gson.toJson(taskManager.getTaskById(tmpTaskId)), 200, ContentTypes.JSON);
+                case GET_TASKS -> sendData(exchange, gson.toJson(taskManager.getTasks()), 200);
+                case GET_TASK_BY_ID -> sendData(exchange, gson.toJson(taskManager.getTaskById(tmpTaskId)), 200);
                 case POST_TASK -> {
                     String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
                     Task task = gson.fromJson(requestBody, Task.class);
@@ -51,25 +49,25 @@ public class TasksHandler extends BaseHttpHandler {
                     try {
                         taskManager.getTaskById(tmpTaskId);
                         taskManager.updateTask(task);
-                        sendData(exchange, "The task with ID=" + tmpTaskId + " has been updated.", 201, ContentTypes.HTML);
+                        sendData(exchange, gson.toJson(task), 201);
                     } catch (NotFoundException e) {
                         taskManager.addTask(task);
-                        sendData(exchange, "The task was created with ID=" + task.getId(), 201, ContentTypes.HTML);
+                        sendData(exchange, 201);
                     }
                 }
                 case DELETE_TASK -> {
                     taskManager.deleteTaskById(tmpTaskId);
-                    sendData(exchange, "The task with ID=" + tmpTaskId + " has been deleted.", 201, ContentTypes.HTML);
+                    sendData(exchange, 204);
                 }
             }
         } catch (NotFoundException | NumberFormatException e) {
-            sendData(exchange, e.getMessage(), 404, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 404);
         } catch (TaskValidateException e) {
-            sendData(exchange, e.getMessage(), 406, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 406);
         } catch (ManagerSaveException e) {
-            sendData(exchange, e.getMessage(), 500, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 500);
         } catch (JsonSyntaxException e) {
-            sendData(exchange, "JSON syntax error.", 406, ContentTypes.HTML);
+            sendData(exchange, "JSON syntax error.", 406);
         }
     }
 }

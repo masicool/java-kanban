@@ -1,8 +1,7 @@
 package server;
 
 public enum ContentTypes {
-    JSON("application/json"),
-    HTML("text?html");
+    JSON("application/json");
 
     private final String contentType;
 

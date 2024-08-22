@@ -6,7 +6,6 @@ import exception.ManagerSaveException;
 import exception.NotFoundException;
 import exception.TaskValidateException;
 import model.Subtask;
-import server.ContentTypes;
 import server.EndpointGroups;
 import server.Endpoints;
 import service.TaskManager;
@@ -41,9 +40,9 @@ public class SubtasksHandler extends BaseHttpHandler {
                 tmpSubtaskId = Integer.parseInt(pathParts[2]);
             }
             switch (endpoint) {
-                case GET_SUBTASKS -> sendData(exchange, gson.toJson(taskManager.getSubtasks()), 200, ContentTypes.JSON);
+                case GET_SUBTASKS -> sendData(exchange, gson.toJson(taskManager.getSubtasks()), 200);
                 case GET_SUBTASK_BY_ID ->
-                        sendData(exchange, gson.toJson(taskManager.getSubtaskById(tmpSubtaskId)), 200, ContentTypes.JSON);
+                        sendData(exchange, gson.toJson(taskManager.getSubtaskById(tmpSubtaskId)), 200);
                 case POST_SUBTASK -> {
                     String requestBody = new String(exchange.getRequestBody().readAllBytes(), CHAR_SET);
                     Subtask subtask = gson.fromJson(requestBody, Subtask.class);
@@ -51,28 +50,25 @@ public class SubtasksHandler extends BaseHttpHandler {
                     try {
                         taskManager.getSubtaskById(tmpSubtaskId);
                         taskManager.updateSubtask(subtask);
-                        sendData(exchange, "The subtask with ID=" + tmpSubtaskId + " has been updated.", 201,
-                                ContentTypes.HTML);
+                        sendData(exchange, gson.toJson(subtask), 201);
                     } catch (NotFoundException e) {
                         taskManager.addSubtask(subtask);
-                        sendData(exchange, "The subtask was created with ID=" + subtask.getId(), 201,
-                                ContentTypes.HTML);
+                        sendData(exchange, 201);
                     }
                 }
                 case DELETE_SUBTASK -> {
                     taskManager.deleteSubtaskById(tmpSubtaskId);
-                    sendData(exchange, "The subtask with ID=" + tmpSubtaskId + " has been deleted.", 201,
-                            ContentTypes.HTML);
+                    sendData(exchange, 204);
                 }
             }
         } catch (NotFoundException | NumberFormatException e) {
-            sendData(exchange, e.getMessage(), 404, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 404);
         } catch (TaskValidateException e) {
-            sendData(exchange, e.getMessage(), 406, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 406);
         } catch (ManagerSaveException e) {
-            sendData(exchange, e.getMessage(), 500, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 500);
         } catch (JsonSyntaxException e) {
-            sendData(exchange, "JSON syntax error.", 406, ContentTypes.HTML);
+            sendData(exchange, "JSON syntax error.", 406);
         }
     }
 }

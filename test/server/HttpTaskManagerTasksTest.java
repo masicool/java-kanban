@@ -199,7 +199,7 @@ public class HttpTaskManagerTasksTest {
         url = URI.create("http://localhost:8080/tasks/2");
         request = HttpRequest.newBuilder().uri(url).DELETE().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
+        assertEquals(204, response.statusCode());
         List<Task> tasksFromManager = manager.getTasks();
         assertNotNull(tasksFromManager, "Задачи не возвращаются!");
         assertEquals(2, tasksFromManager.size(), "Некорректное количество задач!");

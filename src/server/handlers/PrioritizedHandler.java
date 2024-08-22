@@ -2,7 +2,6 @@ package server.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import exception.NotFoundException;
-import server.ContentTypes;
 import server.EndpointGroups;
 import server.Endpoints;
 import service.TaskManager;
@@ -32,9 +31,9 @@ public class PrioritizedHandler extends BaseHttpHandler {
         Endpoints endpoint = getEndpoint(pathParts, exchange.getRequestMethod(), EndpointGroups.PRIORITIZED);
         try {
             if (endpoint == Endpoints.UNKNOWN) throw new NotFoundException("Not Found");
-            sendData(exchange, gson.toJson(taskManager.getPrioritizedTasks()), 200, ContentTypes.JSON);
+            sendData(exchange, gson.toJson(taskManager.getPrioritizedTasks()), 200);
         } catch (NotFoundException e) {
-            sendData(exchange, e.getMessage(), 404, ContentTypes.HTML);
+            sendData(exchange, e.getMessage(), 404);
         }
     }
 }

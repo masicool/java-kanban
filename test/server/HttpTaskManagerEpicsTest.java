@@ -212,7 +212,7 @@ public class HttpTaskManagerEpicsTest {
         url = URI.create("http://localhost:8080/epics/1");
         request = HttpRequest.newBuilder().uri(url).DELETE().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
+        assertEquals(204, response.statusCode());
         List<Subtask> subtasksFromManager = manager.getSubtasks();
         assertTrue(subtasksFromManager.isEmpty(), "Подзадачи не не удалилсь!");
         List<Epic> epicsFromManager = manager.getEpics();

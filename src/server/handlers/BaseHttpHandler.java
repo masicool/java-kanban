@@ -29,26 +29,37 @@ public abstract class BaseHttpHandler implements HttpHandler {
     }
 
     /**
-     * Отправка ответа сервера
+     * Отправка ответа сервера с сообщением в теле ответа
      *
-     * @param exchange    - объект класса HttpExchange для обмена данными
-     * @param text        - текстовая часть ответа сервера
-     * @param rCode       - код ответа сервера
-     * @param contentType - тип контента для указания его в заголовках ответа
+     * @param exchange - объект класса HttpExchange для обмена данными
+     * @param text     - текстовая часть ответа сервера
+     * @param rCode    - код ответа сервера
      * @throws IOException - возможное исключение
      */
-    protected void sendData(HttpExchange exchange, String text, int rCode, ContentTypes contentType) throws IOException {
-        exchange.getResponseHeaders().add("Content-Type", contentType.getValue() + ";charset=" + CHAR_SET.name());
-        String respStr = text;
-        if (contentType == ContentTypes.HTML) {
-            respStr = "<h1>" + rCode + " " + text + "</h1";
-        }
-        byte[] response = respStr.getBytes(CHAR_SET);
-        try (OutputStream os = exchange.getResponseBody()) {
-            exchange.sendResponseHeaders(rCode, response.length);
-            os.write(response);
+    protected void sendData(HttpExchange exchange, String text, int rCode) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", ContentTypes.JSON.getValue() + ";charset=" + CHAR_SET.name());
+
+        if (text.isBlank()) {
+            exchange.sendResponseHeaders(rCode, -1);
+        } else {
+            try (OutputStream os = exchange.getResponseBody()) {
+                byte[] response = text.getBytes(CHAR_SET);
+                exchange.sendResponseHeaders(rCode, response.length);
+                os.write(response);
+            }
         }
         exchange.close();
+    }
+
+    /**
+     * Отправка ответа сервера без сообщения в теле ответа
+     *
+     * @param exchange - объект класса HttpExchange для обмена данными
+     * @param rCode    - код ответа сервера
+     * @throws IOException - возможное исключение
+     */
+    protected void sendData(HttpExchange exchange, int rCode) throws IOException {
+        sendData(exchange, "", rCode);
     }
 
     /**

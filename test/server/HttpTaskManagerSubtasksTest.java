@@ -214,7 +214,7 @@ public class HttpTaskManagerSubtasksTest {
         url = URI.create("http://localhost:8080/subtasks/2");
         request = HttpRequest.newBuilder().uri(url).DELETE().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
+        assertEquals(204, response.statusCode());
         List<Subtask> subtasksFromManager = manager.getSubtasks();
         assertNotNull(subtasksFromManager, "Подзадачи не возвращаются!");
         assertEquals(2, subtasksFromManager.size(), "Некорректное количество подзадач!");
