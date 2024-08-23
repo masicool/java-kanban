@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import exception.TaskValidateException;
 import model.Epic;
 import model.Status;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,18 +21,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     static Subtask subtask1;
     static Subtask subtask2;
     protected T taskManager;
-    TaskValidateException thrown;
+    TaskValidateException taskValidateException;
+    NotFoundException notFoundException;
 
     @BeforeEach
     void beforeEach() {
         task = new Task("Почистить ковер", "Отвезти в химчистку Ковер-33");
-        taskManager.addTask(task);
+        taskManager.addTask(task); // ID = 1
         epic = new Epic("Переезд", "Переезд на новую квартиру");
-        taskManager.addEpic(epic);
+        taskManager.addEpic(epic); // ID = 2
         subtask1 = new Subtask(epic, "Грузчики", "Найти грузчиков");
-        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask1); // ID = 3
         subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS);
-        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2); // ID = 4
     }
 
     @Test
@@ -65,16 +67,15 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     void deleteTaskAndFindTaskById() {
         int tmpId = task.getId();
         taskManager.deleteTaskById(tmpId);
-        assertNull(taskManager.getTaskById(tmpId), "Задача не удалена из списка задач");
+        notFoundException = assertThrows(NotFoundException.class, () -> taskManager.getTaskById(tmpId));
+        assertNotNull(notFoundException.getMessage(), "Должно быть исключение: not found!");
     }
 
     @Test
     void deleteSubtask() {
-        Subtask tmpSubtask = taskManager.getSubtaskById(3);
-        Epic tmpEpic = taskManager.getEpicById(tmpSubtask.getEpicId());
         taskManager.deleteSubtaskById(3);
-        Collection<Subtask> subtasks = taskManager.getEpicSubtasks(tmpEpic);
-        assertFalse(subtasks != null && subtasks.contains(tmpSubtask), "При удалении подзадачи, она не удалилась в " + "эпике");
+        HashSet<Integer> epicSubtasksId = epic.getSubtasksId();
+        assertFalse(epicSubtasksId.contains(3), "При удалении подзадачи, она не удалилась в эпике");
     }
 
     @Test
@@ -101,11 +102,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     void shouldBeChangeStatusEpicWhenChangeStatusSubtask() {
         subtask1.setStatus(Status.DONE);
         taskManager.updateSubtask(subtask1);
+        subtask2.setStatus(Status.DONE);
+        taskManager.updateSubtask(subtask2);
         Epic tmpEpic = taskManager.getEpicById(subtask1.getEpicId());
         assertEquals(Status.DONE, tmpEpic.getStatus(), "Не изменился статус Эпика " + "при смене статуса подзадачи");
+
         subtask1.setStatus(Status.NEW);
         taskManager.updateSubtask(subtask1);
-        tmpEpic = taskManager.getEpicById(subtask1.getEpicId());
+        assertEquals(Status.IN_PROGRESS, tmpEpic.getStatus(), "Не изменился статус Эпика " + "при смене статуса подзадачи");
+
+        subtask1.setStatus(Status.NEW);
+        taskManager.updateSubtask(subtask1);
+        subtask2.setStatus(Status.NEW);
+        taskManager.updateSubtask(subtask2);
         assertEquals(Status.NEW, tmpEpic.getStatus(), "Не изменился статус Эпика " + "при смене статуса подзадачи");
     }
 
@@ -119,8 +128,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void addTwoSubtasksWithStatusNew() {
         subtask1.setStatus(Status.NEW);
-        subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.NEW);
-        taskManager.addSubtask(subtask2);
+        subtask2.setStatus(Status.NEW);
+        taskManager.updateSubtask(subtask2);
         assertEquals(Status.NEW, epic.getStatus());
     }
 
@@ -128,8 +137,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void addTwoSubtasksWithStatusDone() {
         subtask1.setStatus(Status.DONE);
-        subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.DONE);
-        taskManager.addSubtask(subtask2);
+        subtask2.setStatus(Status.DONE);
+        taskManager.updateSubtask(subtask2);
         assertEquals(Status.DONE, epic.getStatus());
     }
 
@@ -179,17 +188,17 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         task.setDuration(Duration.ofMinutes(30));
         taskManager.updateTask(task);
         subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(30));
-        thrown = assertThrows(TaskValidateException.class, () -> taskManager.addSubtask(subtask2), "Должно быть исключение: Пересекается время с уже существующей задачей!");
+        taskValidateException = assertThrows(TaskValidateException.class, () -> taskManager.addSubtask(subtask2), "Должно быть исключение: Пересекается время с уже существующей задачей!");
 
         // временные отрезки пересекаются (перекрытие новой задачи слева)
         subtask2.setStartTime(LocalDateTime.now().minusMinutes(30));
         subtask2.setDuration(Duration.ofMinutes(30));
-        thrown = assertThrows(TaskValidateException.class, () -> taskManager.addSubtask(subtask2), "Должно быть исключение: Пересекается время с уже существующей задачей!");
+        taskValidateException = assertThrows(TaskValidateException.class, () -> taskManager.addSubtask(subtask2), "Должно быть исключение: Пересекается время с уже существующей задачей!");
 
         // временные отрезки пересекаются (перекрытие новой задачи справа)
         subtask2.setStartTime(LocalDateTime.now().plusMinutes(25));
         subtask2.setDuration(Duration.ofMinutes(30));
-        thrown = assertThrows(TaskValidateException.class, () -> taskManager.addSubtask(subtask2), "Должно быть исключение: Пересекается время с уже существующей задачей!");
+        taskValidateException = assertThrows(TaskValidateException.class, () -> taskManager.addSubtask(subtask2), "Должно быть исключение: Пересекается время с уже существующей задачей!");
 
         // временные отрезки не пересекаются (Task справа от Subtask)
         task.setStartTime(LocalDateTime.now().plusDays(1));
@@ -197,7 +206,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertDoesNotThrow(() -> taskManager.updateTask(task), "Не должно быть исключение: Пересекается время с уже существующей задачей!");
         subtask2.setStartTime(LocalDateTime.now());
         subtask2.setDuration(Duration.ofMinutes(30));
-        assertDoesNotThrow(() -> taskManager.updateSubtask(subtask2), "Не должно быть исключение: Пересекается время с уже существующей задачей!");
+        assertDoesNotThrow(() -> taskManager.addSubtask(subtask2), "Не должно быть исключение: Пересекается время с " +
+                "уже существующей задачей!");
 
         // временные отрезки не пересекаются (Task слева от Subtask)
         task.setStartTime(LocalDateTime.now().minusDays(1));
@@ -224,9 +234,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         subtask2 = new Subtask(epic, "Мебель", "Запаковать мебель", Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(30));
         taskManager.addSubtask(subtask2);
-        assertTrue(taskManager.getPrioritizedTasks().contains(task) &&
-                        taskManager.getPrioritizedTasks().contains(subtask2),
-                "Не добавился задача в отсортированный список задач!");
+        assertTrue(taskManager.getPrioritizedTasks().contains(task) && taskManager.getPrioritizedTasks().contains(subtask2), "Не добавился задача в отсортированный список задач!");
     }
 
     // время эпика считается по его подзадачам
@@ -288,24 +296,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         task.setStartTime(LocalDateTime.of(2000, 1, 5, 0, 0));
         task.setDuration(Duration.ofMinutes(45));
         taskManager.updateTask(task);
-        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
-                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 && taskManager.getPrioritizedTasks().getFirst().equals(task));
 
         // повторяем добавление, задача не должна добавится дважды
         taskManager.addTask(task);
-        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
-                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 && taskManager.getPrioritizedTasks().getFirst().equals(task));
         taskManager.addTask(task);
-        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
-                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 && taskManager.getPrioritizedTasks().getFirst().equals(task));
 
         // обновим эту же задачу с теми же значениями
         taskManager.updateTask(task);
-        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
-                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 && taskManager.getPrioritizedTasks().getFirst().equals(task));
         taskManager.addTask(task);
-        assertTrue(taskManager.getPrioritizedTasks().size() == 1 &&
-                taskManager.getPrioritizedTasks().getFirst().equals(task));
+        assertTrue(taskManager.getPrioritizedTasks().size() == 1 && taskManager.getPrioritizedTasks().getFirst().equals(task));
 
         // уберем время у задачи, она должна быть удалена из сортированного списка, список должен быть пуст
         task.setStartTime(null);

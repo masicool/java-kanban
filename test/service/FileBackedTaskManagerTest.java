@@ -17,10 +17,10 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     File tmpFile;
     BufferedWriter file;
-    ManagerSaveException thrown;
+    ManagerSaveException managerSaveException;
 
     FileBackedTaskManagerTest() throws IOException {
         taskManager = new FileBackedTaskManager("tasks.csv");
@@ -31,15 +31,15 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     @Test
     void shouldBeExceptionWhenFileIsNotExist() throws IOException {
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile("something.csv"));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение: Ошибка чтения файла!");
+        managerSaveException = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile("something.csv"));
+        assertNotNull(managerSaveException.getMessage(), "Должно быть исключение: Ошибка чтения файла!");
     }
 
     @Test
     void shouldBeExceptionWhenFileIsEmpty() throws IOException {
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: Файл пустой!");
+        managerSaveException = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
+        assertNotNull(managerSaveException.getMessage(), "Должно быть исключение с текстом: Файл пустой!");
     }
 
     @Test
@@ -90,8 +90,8 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         // нет заголовка файла CSV
         file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
-        assertNotNull(thrown.getMessage(), "Должно быть исключение с текстом: Поврежден заголовок файла CSV: " +
+        managerSaveException = assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()));
+        assertNotNull(managerSaveException.getMessage(), "Должно быть исключение с текстом: Поврежден заголовок файла CSV: " +
                 "неизвестное поле");
         file.close();
         Files.delete(tmpFile.toPath());
@@ -102,7 +102,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         file.write("type,id,,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class,
+        managerSaveException = assertThrows(ManagerSaveException.class,
                 () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
                 "Должно быть исключение с текстом: Поврежден заголовок файла CSV: неизвестное поле!");
         file.close();
@@ -114,7 +114,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         file.write("type,id,,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,1,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class,
+        managerSaveException = assertThrows(ManagerSaveException.class,
                 () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
                 "Должно быть исключение с текстом: не хватает полей!");
         file.close();
@@ -136,7 +136,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         file.write("type,id,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,один,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class,
+        managerSaveException = assertThrows(ManagerSaveException.class,
                 () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
                 "Должно быть исключение: ID задачи должен быть числом!");
         file.close();
@@ -148,7 +148,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         file.write("type,id,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,-100,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class,
+        managerSaveException = assertThrows(ManagerSaveException.class,
                 () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
                 "Должно быть исключение: ID задачи должен быть больше нуля!");
         file.close();
@@ -160,7 +160,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         file.write("type,id,description,status,epic,starttime,duration,endtime\n");
         file.write("TASK,0,Почистить ковер,Отвезти в химчистку Ковер-33,NEW,\n");
         file.close();
-        thrown = assertThrows(ManagerSaveException.class,
+        managerSaveException = assertThrows(ManagerSaveException.class,
                 () -> FileBackedTaskManager.loadFromFile(tmpFile.toString()),
                 "Должно быть исключение: ID задачи должен быть больше нуля!");
     }

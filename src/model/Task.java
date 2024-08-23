@@ -26,6 +26,17 @@ public class Task {
     }
 
     /**
+     * Конструктор объекта с ID и без установки статуса
+     *
+     * @param name        наименование задачи
+     * @param description описание задачи
+     */
+    public Task(int id, String name, String description) {
+        this(name, description);
+        this.id = id;
+    }
+
+    /**
      * Конструктор объекта с установкой статуса
      *
      * @param name        наименование задачи

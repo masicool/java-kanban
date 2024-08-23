@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import exception.TaskValidateException;
 import model.*;
 
@@ -12,8 +13,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epics; // список эпиков
     protected final HashMap<Integer, Subtask> subtasks; // список подзадач
     protected final Set<Task> sortedTasks; // для хранения зада в отсортированном виде по времени начала в
-    protected int taskId; // уникальный идентификатор задачи
     private final HistoryManager historyManager; // объект класса для работы с историей просмотров
+    protected int taskId; // уникальный идентификатор задачи
 
     public InMemoryTaskManager() {
         taskId = 0;
@@ -33,7 +34,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void addTask(Task task) {
-        if (task == null) return;
+        if (task == null) throw new NotFoundException("Task is null.");
         validateAndAddToSortedTaskList(task);
         setId(task);
         tasks.put(task.getId(), task);
@@ -46,7 +47,8 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void addEpic(Epic epic) {
-        if (epic == null) return;
+        if (epic == null) throw new NotFoundException("Epic is null.");
+        if (!epic.getSubtasksId().isEmpty()) throw new NotFoundException("A new epic cannot have subtasks..");
         setId(epic);
         epics.put(epic.getId(), epic);
     }
@@ -58,7 +60,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void addSubtask(Subtask subtask) {
-        if ((subtask == null) || (!epics.containsKey(subtask.getEpicId()))) return;
+        if (subtask == null) throw new NotFoundException("Subtask is null.");
+        if (!epics.containsKey(subtask.getEpicId()))
+            throw new NotFoundException("Subtasks epic with ID=" + subtask.getEpicId() + " is not found.");
         validateAndAddToSortedTaskList(subtask);
         setId(subtask);
         subtasks.put(subtask.getId(), subtask);
@@ -75,7 +79,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateTask(Task task) {
-        if ((task == null) || (!tasks.containsKey(task.getId()))) return;
+        if (task == null) throw new NotFoundException("Task is null.");
+        if (!tasks.containsKey(task.getId()))
+            throw new NotFoundException("Task with ID=" + task.getId() + " is not found.");
         validateAndAddToSortedTaskList(task);
         tasks.replace(task.getId(), task);
     }
@@ -87,19 +93,19 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateEpic(Epic epic) {
-        if ((epic == null) || (!epics.containsKey(epic.getId()))) { // если нет задачи с заданным ID, то возврат
-            return;
-        }
+        if (epic == null) throw new NotFoundException("Epic is null.");
+        if (!epics.containsKey(epic.getId()))
+            throw new NotFoundException("Epic with ID=" + epic.getId() + " is not found.");
 
         // у нового эпика могу быть указаны подзадачи, если так, то проверим, существуют ли они
-        // если хоть одной подзадачи нет, то возврат
+        // если хоть одной подзадачи нет, то генерируем исключение
         for (Integer subtask : epic.getSubtasksId()) {
             if (!subtasks.containsKey(subtask)) {
-                return;
+                throw new NotFoundException("Subtask with ID=" + subtask + " for Epic ID=" + epic.getId() + " not found.");
             }
             // также проверим, что подзадачи эпика ссылаются на него
             if (subtasks.get(subtask).getEpicId() != epic.getId()) {
-                return;
+                throw new NotFoundException("Subtask with ID=" + subtask + " has a different epic.");
             }
         }
 
@@ -108,13 +114,10 @@ public class InMemoryTaskManager implements TaskManager {
         HashSet<Integer> oldSubtasksId = oldEpic.getSubtasksId();
         HashSet<Integer> newSubtasksId = epic.getSubtasksId();
 
-        oldSubtasksId
-                .stream()
-                .filter(oldSubtaskId -> !newSubtasksId.contains(oldSubtaskId))
-                .forEach(oldSubtaskId -> {
-                    sortedTasks.remove(subtasks.get(oldSubtaskId));
-                    subtasks.remove(oldSubtaskId);
-                });
+        oldSubtasksId.stream().filter(oldSubtaskId -> !newSubtasksId.contains(oldSubtaskId)).forEach(oldSubtaskId -> {
+            sortedTasks.removeIf(task -> task.getId() == oldSubtaskId);
+            subtasks.remove(oldSubtaskId);
+        });
 
         // обновим статус эпика
         updateEpicStatus(epic);
@@ -132,7 +135,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         // если нет задачи с заданным ID, то возврат
-        if ((subtask == null) || (!subtasks.containsKey(subtask.getId()))) return;
+        if (subtask == null) throw new NotFoundException("Subtask is null.");
+        if (!subtasks.containsKey(subtask.getId()))
+            throw new NotFoundException("Subtask with ID=" + subtask.getId() + " is not found.");
 
         Epic epic = epics.get(subtask.getEpicId());
         if (epic == null) return; // если у подзадачи не указан эпик или он не правильно указан, то возврат
@@ -149,19 +154,20 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Collection<Task> getTasks() {
+    public List<Task> getTasks() {
         return new ArrayList<>(tasks.values());
     }
 
     /**
      * Получение обычной задачи по ID
      *
-     * @param taskId ID задачи
+     * @param id ID задачи
      * @return задача
      */
     @Override
-    public Task getTaskById(int taskId) {
-        Task task = tasks.get(taskId);
+    public Task getTaskById(int id) {
+        Task task = tasks.get(id);
+        if (task == null) throw new NotFoundException("Task with ID=" + id + " not found.");
         historyManager.add(task);
         return task;
     }
@@ -172,7 +178,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Collection<Epic> getEpics() {
+    public List<Epic> getEpics() {
         return new ArrayList<>(epics.values());
     }
 
@@ -182,8 +188,9 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Epic getEpicById(int epicId) {
-        Epic epic = epics.get(epicId);
+    public Epic getEpicById(int id) {
+        Epic epic = epics.get(id);
+        if (epic == null) throw new NotFoundException("Epic with ID=" + id + " not found.");
         historyManager.add(epic);
         return epic;
     }
@@ -194,7 +201,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Collection<Subtask> getSubtasks() {
+    public List<Subtask> getSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
 
@@ -204,8 +211,9 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач
      */
     @Override
-    public Subtask getSubtaskById(int subtaskId) {
-        Subtask subtask = subtasks.get(subtaskId);
+    public Subtask getSubtaskById(int id) {
+        Subtask subtask = subtasks.get(id);
+        if (subtask == null) throw new NotFoundException("Subtask with ID=" + id + " not found.");
         historyManager.add(subtask);
         return subtask;
     }
@@ -217,16 +225,10 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список подзадач
      */
     @Override
-    public Collection<Subtask> getEpicSubtasks(Epic epic) {
-        if ((epic == null) || (epic.getSubtasksId().isEmpty())) {
-            return null;
-        }
+    public List<Subtask> getEpicSubtasks(Epic epic) {
+        if (epic == null) throw new NotFoundException("Epic is null.");
 
-        return subtasks
-                .entrySet()
-                .stream()
-                .filter(entry -> epic.getSubtasksId().contains(entry.getKey()))
-                .map(Map.Entry::getValue).toList();
+        return subtasks.entrySet().stream().filter(entry -> epic.getSubtasksId().contains(entry.getKey())).map(Map.Entry::getValue).toList();
     }
 
     /**
@@ -234,6 +236,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteTaskById(int id) {
+        if (!tasks.containsKey(id)) throw new NotFoundException("Task with ID=" + id + " not found.");
         historyManager.remove(id); // удаление задачи из истории просмотров
         tasks.remove(id);
         sortedTasks.removeIf(task -> task.getId() == id);
@@ -254,9 +257,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteEpicById(int id) {
-        if (!epics.containsKey(id)) {
-            return;
-        }
+        if (!epics.containsKey(id)) throw new NotFoundException("Epic with ID=" + id + " not found.");
         historyManager.remove(id); // удаление эпика из истории просмотров
         Epic epic = epics.get(id);
         // нужно удалить все подзадачи эпика вместе с самим эпиком
@@ -300,9 +301,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteSubtaskById(int id) {
-        if (!subtasks.containsKey(id)) {
-            return;
-        }
+        if (!subtasks.containsKey(id)) throw new NotFoundException("Subtask with ID=" + id + " not found.");
 
         historyManager.remove(id); // удаление подзадачи из истории просмотров
 
@@ -372,7 +371,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
 
-        HashSet<Integer> epicSubtasksId = epic.getSubtasksId();
+        HashSet<Integer> epicSubtasksId = new HashSet<>(epic.getSubtasksId());
 
         int countStatusNew = 0;
         int countStatusDone = 0;
@@ -407,7 +406,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (isNotIntersectRanges(task)) {
                 sortedTasks.add(task);
             } else {
-                throw new TaskValidateException("Пересекается время с уже существующей задачей!");
+                throw new TaskValidateException("Time is crossing with an existing task!");
             }
         } else { // если дата начала не указана, то задачу нужно удалить из сортированного списка, если она там есть
             sortedTasks.removeIf(oldTask -> oldTask.getId() == task.getId());
@@ -416,10 +415,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private boolean isNotIntersectRanges(Task newTask) {
         if (sortedTasks.isEmpty()) return true;
-        return sortedTasks
-                .stream()
-                .filter(task -> task.getId() != newTask.getId())
-                .allMatch(task -> isNotIntersectRangesTwoTasks(task, newTask));
+        return sortedTasks.stream().filter(task -> task.getId() != newTask.getId()).allMatch(task -> isNotIntersectRangesTwoTasks(task, newTask));
     }
 
     private boolean isNotIntersectRangesTwoTasks(Task task1, Task task2) {

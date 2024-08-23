@@ -39,6 +39,18 @@ public class Epic extends Task {
      * @param id          id задачи
      * @param name        название задачи
      * @param description описания
+     */
+    public Epic(int id, String name, String description) {
+        super(id, name, description);
+        subTasksId = new HashSet<>();
+    }
+
+    /**
+     * Конструктор объекта
+     *
+     * @param id          id задачи
+     * @param name        название задачи
+     * @param description описания
      * @param status      описания
      */
     public Epic(int id, String name, String description, Status status) {
